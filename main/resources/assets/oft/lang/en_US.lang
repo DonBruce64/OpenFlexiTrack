@@ -8,3 +8,8 @@ interact.flag.failure.distance=The two flags are too far away.  The max distance
 interact.flag.failure.nolink=This flag is not linked to another flag.
 interact.flag.failure.materials=You lack the required number of materials to build this track.  You need:
 interact.flag.failure.blockage=There is a block in the way at:
+
+item.track.name=Track
+item.rails.name=Rails
+item.ties.name=Ties
+tile.surveyflag.name=Survey Flag
