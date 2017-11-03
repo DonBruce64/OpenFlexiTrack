@@ -1,6 +1,6 @@
 {
     "parent": "oft:item/basic",
     "textures": {
-        "layer0": "oft:items/track"
+        "layer0": "oft:items/surveyflag"
     }
 }
