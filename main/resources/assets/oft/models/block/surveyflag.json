@@ -1,0 +1,7 @@
+{
+    "textures": {
+        "texture": "oft:items/surveyflag",
+        "particle": "oft:items/surveyflag"
+    },
+    "elements": [ ]
+}

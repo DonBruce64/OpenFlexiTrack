@@ -1,0 +1,10 @@
+#Translated by don_bruce
+
+interact.flag.info.set=First flag set.
+interact.flag.info.link=Flags linked.
+interact.flag.info.clear=First flag un-set.
+interact.flag.failure.dimension=Flags must be in the same dimension.
+interact.flag.failure.distance=The two flags are too far away.  The max distance between flags is 128.
+interact.flag.failure.nolink=This flag is not linked to another flag.
+interact.flag.failure.materials=You lack the required number of materials to build this track.  You need:
+interact.flag.failure.blockage=There is a block in the way at:
