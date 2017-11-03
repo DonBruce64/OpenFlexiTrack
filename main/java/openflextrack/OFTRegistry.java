@@ -34,70 +34,40 @@ public class OFTRegistry{
 		
 	/**All run-time things go here.**/
 	public void init(){
-		initItems();
-		initBlocks();
-		initPackets();
-	}
-
-	private void initItems(){
-		for(Field field : this.getClass().getFields()){
-			if(field.getType().equals(Item.class)){
-				try{
-					Item item = (Item) field.get(Item.class);
-					if(item.getUnlocalizedName().equals("item.null")){
-						item.setUnlocalizedName(field.getName().toLowerCase());
-					}
-					registerItem(item);
-				}catch(Exception e){
-					e.printStackTrace();
-				}
-			}
-		}
-	}
-	
-	private void initBlocks(){
-		for(Field field : this.getClass().getFields()){
-			if(field.getType().equals(Block.class)){
-				try{
-					registerBlock((Block) field.get(Block.class));
-				}catch(Exception e){
-					e.printStackTrace();
-				}
-			}
-		}
-	}
-	
-	/**
-	 * Registers the given item.
-	 * @param item
-	 */
-	private static void registerItem(Item item){
-		String registryName = item.getUnlocalizedName().split("\\.")[1].toLowerCase();
-		GameRegistry.register(item.setRegistryName(registryName));
-	}
-	
-	/**x
-	 * Registers the given block and adds it to the creative tab list.
-	 * Also adds the respective TileEntity if the block has one.
-	 * @param block
-	 */
-	private static void registerBlock(Block block){
-		String name = block.getClass().getSimpleName().toLowerCase().substring(5);
-		GameRegistry.register(block.setRegistryName(name).setUnlocalizedName(name));
-		if(block.getCreativeTabToDisplayOn() != null){
-			GameRegistry.register(new ItemBlock(block).setRegistryName(name));
-		}
-		if(block instanceof ITileEntityProvider){
-			Class<? extends TileEntity> tileEntityClass = ((ITileEntityProvider) block).createNewTileEntity(null, 0).getClass();
-			GameRegistry.registerTileEntity(tileEntityClass, tileEntityClass.getSimpleName());
-		}
-	}
-	
-	private void initPackets(){
+		registerItem(track, "track");
+		registerBlock(trackStructure, true);
+		registerBlock(trackStructureFake, false);
+		registerBlock(surveyFlag, true);
+		
 		int packetNumber = 0;
 		OFT.OFTNet.registerMessage(ChatPacket.Handler.class, ChatPacket.class, ++packetNumber, Side.CLIENT);
 		OFT.OFTNet.registerMessage(TileEntityClientRequestDataPacket.Handler.class, TileEntityClientRequestDataPacket.class, ++packetNumber, Side.SERVER);
 		OFT.OFTNet.registerMessage(TileEntitySyncPacket.Handler.class, TileEntitySyncPacket.class, ++packetNumber, Side.CLIENT);
 		OFT.OFTNet.registerMessage(TileEntitySyncPacket.Handler.class, TileEntitySyncPacket.class, ++packetNumber, Side.SERVER);
+	}
+
+	/**
+	 * Registers the given item.
+	 */
+	private static void registerItem(Item item, String itemName){
+		GameRegistry.register(item.setRegistryName(itemName).setUnlocalizedName(itemName));
+	}
+	
+	/**x
+	 * Registers the given block.
+	 * Also adds the respective TileEntity if the block has one.
+	 */
+	private static void registerBlock(Block block, boolean registerItemBlock){
+		String name = block.getClass().getSimpleName().toLowerCase().substring(5);
+		if(block.getRegistryName() == null){
+			GameRegistry.register(block.setRegistryName(name).setUnlocalizedName(name));
+			if(block instanceof ITileEntityProvider){
+				Class<? extends TileEntity> tileEntityClass = ((ITileEntityProvider) block).createNewTileEntity(null, 0).getClass();
+				GameRegistry.registerTileEntity(tileEntityClass, tileEntityClass.getSimpleName());
+			}
+		}
+		if(registerItemBlock && Item.getItemFromBlock(block) == null){
+			GameRegistry.register(new ItemBlock(block).setRegistryName(name));
+		}
 	}
 }
