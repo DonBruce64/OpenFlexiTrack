@@ -3,9 +3,11 @@ package openflextrack.blocks;
 import net.minecraft.block.material.Material;
 import net.minecraft.block.state.IBlockState;
 import net.minecraft.entity.item.EntityItem;
+import net.minecraft.entity.player.EntityPlayer;
 import net.minecraft.item.ItemStack;
 import net.minecraft.util.math.AxisAlignedBB;
 import net.minecraft.util.math.BlockPos;
+import net.minecraft.util.math.RayTraceResult;
 import net.minecraft.world.IBlockAccess;
 import net.minecraft.world.World;
 import openflextrack.OFTRegistry;
@@ -20,12 +22,18 @@ public class BlockTrackStructure extends BlockRotateable{
 	}
 	
 	@Override
+	public ItemStack getPickBlock(IBlockState state, RayTraceResult target, World world, BlockPos pos, EntityPlayer player){
+		//TODO add track sub-types here as properties and return meta for item damage.
+        return new ItemStack(OFTRegistry.track);
+    }
+	
+	@Override
 	public void breakBlock(World world, BlockPos pos, IBlockState state){
-		TileEntityTrack track = (TileEntityTrack) world.getTileEntity(pos);
+		TileEntityTrackStructure track = (TileEntityTrackStructure) world.getTileEntity(pos);
 		if(track != null){
 			if(track.curve != null){
 				if(!world.isRemote){
-					TileEntityTrack otherEnd = (TileEntityTrack) world.getTileEntity(track.curve.endPos);
+					TileEntityTrackStructure otherEnd = (TileEntityTrackStructure) world.getTileEntity(track.curve.endPos);
 					if(otherEnd != null){
 						int numberTracks = (int) track.curve.pathLength;
 						while(numberTracks > 0){
@@ -56,6 +64,6 @@ public class BlockTrackStructure extends BlockRotateable{
 
 	@Override
 	public TileEntityRotatable getTileEntity(){
-		return new TileEntityTrack();
+		return new TileEntityTrackStructure();
 	}
 }

@@ -23,11 +23,8 @@ import openflextrack.OFTRegistry;
 public class BlockTrackStructureFake extends Block{
 	public static final PropertyInteger height = PropertyInteger.create("height", 0, 15);
 	private static final AxisAlignedBB heightBoxes[] = initHeightBoxes();
-
 	private static boolean shouldTryToBreakTrackWhenBroken = true;
-	private static int breakageRecusionDepth = 0;
 	private static BlockPos firstBrokenBlockPos;
-	private static List<BlockPos> blockCheckPos = new ArrayList<BlockPos>();
 
 	public BlockTrackStructureFake(){
 		super(Material.IRON);
@@ -38,63 +35,71 @@ public class BlockTrackStructureFake extends Block{
 	}
 	
 	@Override
+	public ItemStack getPickBlock(IBlockState state, RayTraceResult target, World world, BlockPos pos, EntityPlayer player){
+		BlockPos masterPos = getMasterPos(world, pos);
+		if(masterPos != null){
+			return world.getBlockState(masterPos).getBlock().getPickBlock(world.getBlockState(masterPos), target, world, masterPos, player);
+		}else{
+			return null;
+		}
+    }	
+	
+	@Override
 	public void breakBlock(World world, BlockPos pos, IBlockState state){
 		if(shouldTryToBreakTrackWhenBroken){
-			if(breakageRecusionDepth == 0){
+			BlockPos masterPos = getMasterPos(world, pos);
+			if(masterPos != null){
 				firstBrokenBlockPos = pos;
+				world.setBlockToAir(masterPos);
 			}
-			++breakageRecusionDepth;
-			//Add current block to list.
-			blockCheckPos.add(pos);
-			for(EnumFacing searchOffset : EnumFacing.VALUES){
-				boolean skipCheck = false;
-				if(blockCheckPos.contains(pos.offset(searchOffset))){
-					//Block already checked.
-					skipCheck = true;
-					continue;
-				}else{
-					for(BlockPos testPos : blockCheckPos){
-						if(Math.sqrt(pos.offset(searchOffset).distanceSq(testPos)) > 150){
-							//Block is too far to be a possible match.
-							skipCheck = true;
-							break;
-						}
-					}
-					
-				}
-				if(!skipCheck){
-					if(world.getTileEntity(pos.offset(searchOffset)) instanceof TileEntityTrack){
-						//Found a track TE.  See if it's the parent for this fake track block.
-						if(((TileEntityTrack) world.getTileEntity(pos.offset(searchOffset))).getFakeTracks().contains(pos)){
-							//Just because the TE is the parent for a fake block, doesn't me it's the parent for the FIRST broken block.
-							//We could have searched the wrong way and missed the real TE.
-							if(((TileEntityTrack) world.getTileEntity(pos.offset(searchOffset))).getFakeTracks().contains(firstBrokenBlockPos)){
-								//Track TE contains the first broken fake track.  Set master track block to air and hand off breaking.
-								world.setBlockToAir(pos.offset(searchOffset));
-								blockCheckPos.clear();
-								firstBrokenBlockPos = null;
-								break;
-							}
-						}
-					}else if(world.getBlockState(pos.offset(searchOffset)).getBlock() instanceof BlockTrackStructureFake){
-						//Found another fake track.  Call it's break code to pass on the message.
-						this.breakBlock(world, pos.offset(searchOffset), state);
-					}
-				}
-			}
-			--breakageRecusionDepth;
 		}
 		super.breakBlock(world, pos, state);
+	}
+	
+	public BlockPos getMasterPos(World world, final BlockPos thisPos){
+		List<BlockPos> testedBlocks = new ArrayList<BlockPos>();
+		List<BlockPos> blocksToTest = new ArrayList<BlockPos>();
+		testedBlocks.add(thisPos);
+		blocksToTest.add(thisPos);
+		
+		while(blocksToTest.size() > 0){
+			if(blocksToTest.size() > 0){
+				BlockPos testingPos = blocksToTest.get(0);
+				for(EnumFacing searchOffset : EnumFacing.VALUES){
+					if(testedBlocks.contains(testingPos.offset(searchOffset))){
+						//Block already tested from another block.  Don't test it again.
+						continue;
+					}else if(Math.sqrt(testingPos.offset(searchOffset).distanceSq(thisPos)) > 150){
+						//Block is too far to possibly be the master TE for this block.
+						continue;
+					}
+					if(world.getTileEntity(testingPos.offset(searchOffset)) instanceof TileEntityTrackStructure){
+						//Found a track TE.  See if it's the parent for this fake track block.
+						if(((TileEntityTrackStructure) world.getTileEntity(testingPos.offset(searchOffset))).getFakeTracks().contains(thisPos)){
+							return testingPos.offset(searchOffset);
+						}
+					}else if(world.getBlockState(testingPos.offset(searchOffset)).getBlock().equals(OFTRegistry.trackStructureFake)){
+						//Found another fake track.  Check to see if this has been tested and add to lists if not so.
+						if(!testedBlocks.contains(testingPos.offset(searchOffset))){
+							//First make sure block hasn't been tested already.
+							if(!blocksToTest.contains(testingPos.offset(searchOffset))){
+								//If the blocks to test from don't contain this block, add it now.
+								blocksToTest.add(testingPos.offset(searchOffset));
+							}
+						}
+					}
+				}
+				//End of the facing loop for this block.  Set block as tested and remove from the toTestFrom list.
+				blocksToTest.remove(testingPos);
+				testedBlocks.add(testingPos);
+			}
+		}
+		return null;
 	}
 
 	@Override
     public Item getItemDropped(IBlockState state, Random rand, int fortune){
         return null;
-    }
-	
-	@Override
-	public ItemStack getPickBlock(IBlockState state, RayTraceResult target, World world, BlockPos pos, EntityPlayer player){
-		 return new ItemStack(OFTRegistry.track);
     }
 	
 	@Override

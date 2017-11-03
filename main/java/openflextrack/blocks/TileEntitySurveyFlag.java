@@ -72,8 +72,8 @@ public class TileEntitySurveyFlag extends TileEntityRotatable{
 		
 		worldObj.setBlockState(this.pos, OFTRegistry.trackStructure.getDefaultState());
 		worldObj.setBlockState(this.pos.add(curve.endPos), OFTRegistry.trackStructure.getDefaultState());
-		TileEntityTrack startTile = new TileEntityTrack(curve);
-		TileEntityTrack endTile = new TileEntityTrack(otherFlagCurve);
+		TileEntityTrackStructure startTile = new TileEntityTrackStructure(curve);
+		TileEntityTrackStructure endTile = new TileEntityTrackStructure(otherFlagCurve);
 		startTile.setFakeTracks(new ArrayList<BlockPos>(blockMap.keySet()));
 		endTile.setFakeTracks(new ArrayList<BlockPos>(blockMap.keySet()));
 		worldObj.setTileEntity(this.pos, startTile);

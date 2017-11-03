@@ -14,7 +14,7 @@ import net.minecraft.util.math.BlockPos;
 import net.minecraft.world.World;
 import openflextrack.OFT;
 import openflextrack.baseclasses.OFTCurve;
-import openflextrack.blocks.TileEntityTrack;
+import openflextrack.blocks.TileEntityTrackStructure;
 import openflextrack.rendering.blockmodels.ModelTrackTie;
 
 public class RenderTrack extends TileEntitySpecialRenderer{
@@ -42,14 +42,14 @@ public class RenderTrack extends TileEntitySpecialRenderer{
 	@Override
 	public void renderTileEntityAt(TileEntity tile, double x, double y, double z, float partialTicks, int destroyStage){
 		super.renderTileEntityAt(tile, x, y, z, partialTicks, destroyStage);
-		TileEntityTrack track = (TileEntityTrack) tile;
+		TileEntityTrackStructure track = (TileEntityTrackStructure) tile;
 		if(track.curve != null){
 			TileEntity trackTileEntity = track.getWorld().getTileEntity(track.getPos().add(track.curve.endPos));
-			if(!(trackTileEntity instanceof TileEntityTrack)){
+			if(!(trackTileEntity instanceof TileEntityTrackStructure)){
 				//Sometimes the TE's don't break evenly.  Make sure this doesn't happen and we try to render a flag here.
 				return;
 			}
-			TileEntityTrack otherEnd = (TileEntityTrack) trackTileEntity;
+			TileEntityTrackStructure otherEnd = (TileEntityTrackStructure) trackTileEntity;
 			
 			//Quick check to see if connection is still valid.
 			if(track.connectedTrack != null){
@@ -114,20 +114,20 @@ public class RenderTrack extends TileEntitySpecialRenderer{
 		}
 	}
 	
-	private static boolean connectToAdjacentTracks(TileEntityTrack track){
+	private static boolean connectToAdjacentTracks(TileEntityTrackStructure track){
 		for(byte i=-1; i<=1; ++i){
 			for(byte j=-1; j<=1; ++j){
 				if(!(i == 0 && j == 0)){
 					TileEntity testTile = track.getWorld().getTileEntity(track.getPos().add(i, 0, j));
-					if(testTile instanceof TileEntityTrack){
-						if(((TileEntityTrack) testTile).curve != null){
-							if(((TileEntityTrack) testTile).curve.startAngle == (180 + track.curve.startAngle)%360){
+					if(testTile instanceof TileEntityTrackStructure){
+						if(((TileEntityTrackStructure) testTile).curve != null){
+							if(((TileEntityTrackStructure) testTile).curve.startAngle == (180 + track.curve.startAngle)%360){
 								//Make sure we don't link to ourselves.  Because players will find a way to make this happen.
 								if(!testTile.getPos().equals(track.getPos().add(track.curve.endPos))){
 									//If the track we want to link to has already linked with us, stop the link.
 									//Double linkings cause double rendering and lots of errors.
-									if(!track.equals(((TileEntityTrack) testTile).connectedTrack)){
-										track.connectedTrack = (TileEntityTrack) testTile;
+									if(!track.equals(((TileEntityTrackStructure) testTile).connectedTrack)){
+										track.connectedTrack = (TileEntityTrackStructure) testTile;
 									}
 									return true;
 								}
@@ -146,7 +146,7 @@ public class RenderTrack extends TileEntitySpecialRenderer{
 	/**
 	 * This can be called to render track anywhere in the code, not just from this class.
 	 */
-	public static void renderTrackSegmentFromCurve(World world, BlockPos startPos, OFTCurve curve, boolean holographic, TileEntityTrack startConnector, TileEntityTrack endConnector){
+	public static void renderTrackSegmentFromCurve(World world, BlockPos startPos, OFTCurve curve, boolean holographic, TileEntityTrackStructure startConnector, TileEntityTrackStructure endConnector){
 		final float offset = 0.65F;
 		float textureOffset = 0;
 		List<float[]> texPoints = new ArrayList<float[]>();
@@ -157,10 +157,10 @@ public class RenderTrack extends TileEntitySpecialRenderer{
 		boolean renderStartTie = false;
 		boolean renderStartRail = false;
 		boolean renderStartRailExtra = false;
-		TileEntityTrack startConnectorMaster = null;
+		TileEntityTrackStructure startConnectorMaster = null;
 		if(startConnector != null){
 			if(startConnector.curve != null){	
-				startConnectorMaster = (TileEntityTrack) world.getTileEntity(startConnector.getPos().add(startConnector.curve.endPos));
+				startConnectorMaster = (TileEntityTrackStructure) world.getTileEntity(startConnector.getPos().add(startConnector.curve.endPos));
 				if(startConnectorMaster != null){
 					boolean renderFromOtherEnd = startConnectorMaster.getPos().getX() != startConnector.getPos().getX() ? startConnectorMaster.getPos().getX() > startConnector.getPos().getX() : startConnectorMaster.getPos().getZ() > startConnector.getPos().getZ();
 					if(renderFromOtherEnd){
@@ -181,10 +181,10 @@ public class RenderTrack extends TileEntitySpecialRenderer{
 		boolean renderEndTie = false;
 		boolean renderEndRail = false;
 		boolean renderEndRailExtra = false;
-		TileEntityTrack endConnectorMaster = null;
+		TileEntityTrackStructure endConnectorMaster = null;
 		if(endConnector != null){
 			if(endConnector.curve != null){
-				endConnectorMaster = (TileEntityTrack) world.getTileEntity(endConnector.getPos().add(endConnector.curve.endPos));
+				endConnectorMaster = (TileEntityTrackStructure) world.getTileEntity(endConnector.getPos().add(endConnector.curve.endPos));
 				if(endConnectorMaster != null){
 					boolean renderFromOtherEnd = endConnectorMaster.getPos().getX() != endConnector.getPos().getX() ? endConnectorMaster.getPos().getX() > endConnector.getPos().getX() : endConnectorMaster.getPos().getZ() > endConnector.getPos().getZ();
 					if(renderFromOtherEnd){

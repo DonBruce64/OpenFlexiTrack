@@ -9,7 +9,7 @@ import net.minecraft.client.renderer.block.model.ModelResourceLocation;
 import net.minecraft.item.Item;
 import net.minecraftforge.fml.client.registry.ClientRegistry;
 import openflextrack.blocks.TileEntitySurveyFlag;
-import openflextrack.blocks.TileEntityTrack;
+import openflextrack.blocks.TileEntityTrackStructure;
 import openflextrack.rendering.blockrenders.RenderSurveyFlag;
 import openflextrack.rendering.blockrenders.RenderTrack;
 
@@ -20,7 +20,7 @@ public class OFTRegistryClient{
 
 	public static void preInit(){
 		ClientRegistry.bindTileEntitySpecialRenderer(TileEntitySurveyFlag.class, new RenderSurveyFlag());
-		ClientRegistry.bindTileEntitySpecialRenderer(TileEntityTrack.class, new RenderTrack());
+		ClientRegistry.bindTileEntitySpecialRenderer(TileEntityTrackStructure.class, new RenderTrack());
 	}
 	
 	public static void init(){

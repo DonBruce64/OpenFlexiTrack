@@ -10,17 +10,17 @@ import net.minecraftforge.fml.relauncher.Side;
 import net.minecraftforge.fml.relauncher.SideOnly;
 import openflextrack.baseclasses.OFTCurve;
 
-public class TileEntityTrack extends TileEntityRotatable{
+public class TileEntityTrackStructure extends TileEntityRotatable{
 	public boolean hasTriedToConnectToOtherSegment;
-	public TileEntityTrack connectedTrack;
+	public TileEntityTrackStructure connectedTrack;
 	public OFTCurve curve;
 	private List<BlockPos> fakeTracks = new ArrayList<BlockPos>();
 	
-	public TileEntityTrack(){
+	public TileEntityTrackStructure(){
 		super();
 	}
 	
-	public TileEntityTrack(OFTCurve curve){
+	public TileEntityTrackStructure(OFTCurve curve){
 		this.curve = curve;
 	}
 	
