@@ -25,9 +25,9 @@ public class OFTRegistryClient{
 	
 	public static void init(){
 		ItemModelMesher mesher = Minecraft.getMinecraft().getRenderItem().getItemModelMesher();
-		mesher.register(OFTRegistry.ties, 0, new ModelResourceLocation(OFT.MODID + ":" + OFTRegistry.ties.getUnlocalizedName().substring(5).replace("block", ""), "inventory"));
-		mesher.register(OFTRegistry.rails, 0, new ModelResourceLocation(OFT.MODID + ":" + OFTRegistry.rails.getUnlocalizedName().substring(5).replace("block", ""), "inventory"));
-		mesher.register(OFTRegistry.track, 0, new ModelResourceLocation(OFT.MODID + ":" + OFTRegistry.track.getUnlocalizedName().substring(5).replace("block", ""), "inventory"));
-		mesher.register(Item.getItemFromBlock(OFTRegistry.surveyFlag), 0, new ModelResourceLocation(OFT.MODID + ":" + Item.getItemFromBlock(OFTRegistry.surveyFlag).getUnlocalizedName().substring(5).replace("block", ""), "inventory"));
+		mesher.register(OFTRegistry.ties, 0, new ModelResourceLocation(OFT.MODID + ":" + "ties", "inventory"));
+		mesher.register(OFTRegistry.rails, 0, new ModelResourceLocation(OFT.MODID + ":" + "rails", "inventory"));
+		mesher.register(OFTRegistry.track, 0, new ModelResourceLocation(OFT.MODID + ":" + "track", "inventory"));
+		mesher.register(Item.getItemFromBlock(OFTRegistry.surveyFlag), 0, new ModelResourceLocation(OFT.MODID + ":" + "surveyflag", "inventory"));
 	}
 }
