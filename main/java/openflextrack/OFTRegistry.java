@@ -27,6 +27,8 @@ import openflextrack.packets.TileEntitySyncPacket;
 public class OFTRegistry{
 	public static final OFTRegistry instance = new OFTRegistry();
 	
+	public static final Item ties = new Item();
+	public static final Item rails = new Item();
 	public static final Item track = new Item();
 	public static final Block trackStructure = new BlockTrackStructure();
 	public static final Block trackStructureFake = new BlockTrackStructureFake();
@@ -34,6 +36,8 @@ public class OFTRegistry{
 		
 	/**All run-time things go here.**/
 	public void init(){
+		registerItem(ties, "ties");
+		registerItem(rails, "rails");
 		registerItem(track, "track");
 		registerBlock(trackStructure, true);
 		registerBlock(trackStructureFake, false);
