@@ -39,7 +39,7 @@ public class OFTRegistry{
 		registerItem(ties, "ties");
 		registerItem(rails, "rails");
 		registerItem(track, "track");
-		registerBlock(trackStructure, true);
+		registerBlock(trackStructure, false);
 		registerBlock(trackStructureFake, false);
 		registerBlock(surveyFlag, true);
 		
