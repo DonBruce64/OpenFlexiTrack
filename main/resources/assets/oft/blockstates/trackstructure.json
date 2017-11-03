@@ -1,5 +1,5 @@
 {
     "variants": {
-        "normal": { "model": "mts:trackstructure" }
+        "normal": { "model": "oft:trackstructure" }
 		}
 }
