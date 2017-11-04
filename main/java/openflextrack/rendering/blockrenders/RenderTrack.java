@@ -81,35 +81,18 @@ public class RenderTrack extends TileEntitySpecialRenderer{
 			renderTrackSegmentFromCurve(track.getWorld(), track.getPos(), track.curve, false, track.connectedTrack, otherEnd != null ? otherEnd.connectedTrack : null);
 			GL11.glPopMatrix();
 			
-			
-			//CAUSES OVER 20FPS LOSS.  DO NOT USE EXCEPT FOR TESTING!
-			/*
 			Minecraft.getMinecraft().getTextureManager().bindTexture(ballastTexture);
 			//Render master tracks with ballast.
 			GL11.glPushMatrix();
-			int lightValue = track.getWorld().getCombinedLight(track.curve.blockStartPos, 0);
+			int lightValue = track.getWorld().getCombinedLight(track.getPos(), 0);
 			OpenGlHelper.setLightmapTextureCoords(OpenGlHelper.lightmapTexUnit, lightValue%65536, lightValue/65536);
-			drawBallastBox(1F/16F);
+			drawTileEntityBallastBox();
 			
-			GL11.glTranslatef(track.curve.blockEndPos.getX() - track.curve.blockStartPos.getX(), track.curve.blockEndPos.getY() - track.curve.blockStartPos.getY(), track.curve.blockEndPos.getZ() - track.curve.blockStartPos.getZ());
-			lightValue = track.getWorld().getCombinedLight(track.curve.blockEndPos, 0);
+			GL11.glTranslatef(track.curve.endPos.getX(), track.curve.endPos.getY(), track.curve.endPos.getZ());
+			lightValue = track.getWorld().getCombinedLight(track.getPos().add(track.curve.endPos), 0);
 			OpenGlHelper.setLightmapTextureCoords(OpenGlHelper.lightmapTexUnit, lightValue%65536, lightValue/65536);
-			drawBallastBox(1F/16F);
+			drawTileEntityBallastBox();
 			GL11.glPopMatrix();
-			
-			//Render fake tracks with ballast.
-			for(BlockPos fakePos : track.getFakeTracks()){
-				//Sometimes while breaking states don't update at the same time.
-				//Make sure we have a fake track here.
-				if(track.getWorld().getBlockState(fakePos).getBlock().equals(MTSRegistry.trackStructureFake)){
-					GL11.glPushMatrix();
-					GL11.glTranslatef(fakePos.getX() - track.curve.blockStartPos.getX(), fakePos.getY() - track.curve.blockStartPos.getY(), fakePos.getZ() - track.curve.blockStartPos.getZ());
-					lightValue = track.getWorld().getCombinedLight(fakePos, 0);
-					OpenGlHelper.setLightmapTextureCoords(OpenGlHelper.lightmapTexUnit, lightValue%65536, lightValue/65536);
-					drawBallastBox(track.getWorld().getBlockState(fakePos).getValue(BlockTrackStructureFake.height)/16F);
-					GL11.glPopMatrix();
-				}
-			}*/
 			GL11.glPopMatrix();
 		}
 	}
@@ -461,75 +444,51 @@ public class RenderTrack extends TileEntitySpecialRenderer{
 		GL11.glPopMatrix();
 	}
 	
-	private static void drawBallastBox(float height){
-		//TODO edit the fake tracks to make these go in to a Json def.
-		height += 1/16F;
+	private static void drawTileEntityBallastBox(){		
+		//Sides
+		GL11.glPushMatrix();
+		GL11.glTranslatef(0.5F, 0, 0.5F);
+		for(byte i=0; i<4; ++i){
+			GL11.glPushMatrix();
+			GL11.glRotatef(90*i, 0, 1, 0);
+			GL11.glTranslatef(-0.5F, 0, 0.5F);
+			GL11.glBegin(GL11.GL_QUADS);
+			GL11.glTexCoord2f(0, 0);
+			GL11.glNormal3f(0, 0, 1);
+			GL11.glVertex3d(0, 0.125F, 0);
+			
+			GL11.glTexCoord2f(0, 0.125F);
+			GL11.glNormal3f(0, 0, 1);
+			GL11.glVertex3d(0, -0.01, 0);
+			
+			GL11.glTexCoord2f(1, 0.125F);
+			GL11.glNormal3f(0, 0, 1);
+			GL11.glVertex3d(1, -0.01, 0);
+			
+			GL11.glTexCoord2f(1, 0);
+			GL11.glNormal3f(0, 0, 1);
+			GL11.glVertex3d(1, 0.125F, 0);
+			GL11.glEnd();
+			GL11.glPopMatrix();
+		}
+		GL11.glPopMatrix();
+
+		//Top
 		GL11.glBegin(GL11.GL_QUADS);
-		GL11.glTexCoord2f(1, 1 - height);
-		GL11.glNormal3f(-1, 0, 0);
-		GL11.glVertex3d(0, height, 0);
 		GL11.glTexCoord2f(1, 1);
-		GL11.glNormal3f(-1, 0, 0);
-		GL11.glVertex3d(0, -0.01, 0);
-		GL11.glTexCoord2f(0, 1);
-		GL11.glNormal3f(-1, 0, 0);
-		GL11.glVertex3d(0, -0.01, 1);
-		GL11.glTexCoord2f(0, 1 - height);
-		GL11.glNormal3f(-1, 0, 0);
-		GL11.glVertex3d(0, height, 1);
-		
-		GL11.glTexCoord2f(0, 1 - height);
-		GL11.glNormal3f(1, 0, 0);
-		GL11.glVertex3d(1, height, 1);
-		GL11.glTexCoord2f(0, 1);
-		GL11.glNormal3f(1, 0, 0);
-		GL11.glVertex3d(1, -0.01, 1);
-		GL11.glTexCoord2f(1, 1);
-		GL11.glNormal3f(1, 0, 0);
-		GL11.glVertex3d(1, -0.01, 0);
-		GL11.glTexCoord2f(1, 1 - height);
-		GL11.glNormal3f(1, 0, 0);
-		GL11.glVertex3d(1, height, 0);
-		
-		GL11.glTexCoord2f(0, 1 - height);
-		GL11.glNormal3f(0, 0, -1);
-		GL11.glVertex3d(1, height, 0);
-		GL11.glTexCoord2f(0, 1);
-		GL11.glNormal3f(0, 0, -1);
-		GL11.glVertex3d(1, -0.01, 0);
-		GL11.glTexCoord2f(1, 1);
-		GL11.glNormal3f(0, 0, -1);
-		GL11.glVertex3d(0, -0.01, 0);
-		GL11.glTexCoord2f(1, 1 - height);
-		GL11.glNormal3f(0, 0, -1);
-		GL11.glVertex3d(0, height, 0);
-		
-		GL11.glTexCoord2f(1, 1 - height);
-		GL11.glNormal3f(0, 0, 1);
-		GL11.glVertex3d(0, height, 1);
-		GL11.glTexCoord2f(1, 1);
-		GL11.glNormal3f(0, 0, 1);
-		GL11.glVertex3d(0, -0.01, 1);
-		GL11.glTexCoord2f(0, 1);
-		GL11.glNormal3f(0, 0, 1);
-		GL11.glVertex3d(1, -0.01, 1);
-		GL11.glTexCoord2f(0, 1 - height);
-		GL11.glNormal3f(0, 0, 1);
-		GL11.glVertex3d(1, height, 1);
-		
+		GL11.glNormal3f(0, 1, 0);
+		GL11.glVertex3d(1, 0.125F, 1);
 		GL11.glTexCoord2f(1, 0);
 		GL11.glNormal3f(0, 1, 0);
-		GL11.glVertex3d(1, height, 1);
-		GL11.glTexCoord2f(1, 1);
-		GL11.glNormal3f(0, 1, 0);
-		GL11.glVertex3d(1, height, 0);
-		GL11.glTexCoord2f(0, 1);
-		GL11.glNormal3f(0, 1, 0);
-		GL11.glVertex3d(0, height, 0);
+		GL11.glVertex3d(1, 0.125F, 0);
 		GL11.glTexCoord2f(0, 0);
 		GL11.glNormal3f(0, 1, 0);
-		GL11.glVertex3d(0, height, 1);
+		GL11.glVertex3d(0, 0.125F, 0);
+		GL11.glTexCoord2f(0, 1);
+		GL11.glNormal3f(0, 1, 0);
+		GL11.glVertex3d(0, 0.125F, 1);
 		
+		//Bottom
 		GL11.glTexCoord2f(0, 0);
 		GL11.glNormal3f(0, -1, 0);
 		GL11.glVertex3d(0, -0.01, 1);

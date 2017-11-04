@@ -1,0 +1,19 @@
+{
+    "textures": {
+        "texture": "oft:items/track",
+        "particle": "oft:items/track",
+        "ballast": "oft:blocks/ballast"
+    },
+    "elements": [{   
+        "from": [ 0, 0, 0 ],
+        "to": [ 16, 1, 16 ],
+        "faces": {
+            "down":  { "uv": [ 0, 0, 16, 16 ], "texture": "#ballast", "cullface": "down" },
+            "up":    { "uv": [ 0, 0, 16, 16 ], "texture": "#ballast" },
+            "north": { "uv": [ 0, 0, 16, 1 ], "texture": "#ballast", "cullface": "north" },
+            "south": { "uv": [ 0, 0, 16, 1 ], "texture": "#ballast", "cullface": "south" },
+            "west":  { "uv": [ 0, 0, 16, 1 ], "texture": "#ballast", "cullface": "west" },
+            "east":  { "uv": [ 0, 0, 16, 1 ], "texture": "#ballast", "cullface": "east" }
+        }
+    }]
+}

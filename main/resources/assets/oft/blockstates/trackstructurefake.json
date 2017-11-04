@@ -1,9 +1,21 @@
 {
-    "multipart": [
-			{
-				"apply": {
-					"model": "oft:trackstructurefake"
-				}
-			}
-		]
+    "variants": {
+        "height=0": { "model": "oft:trackstructurefake00" },
+        "height=1": { "model": "oft:trackstructurefake01" },
+        "height=2": { "model": "oft:trackstructurefake02" },
+        "height=3": { "model": "oft:trackstructurefake03" },
+        "height=4": { "model": "oft:trackstructurefake04" },
+        "height=5": { "model": "oft:trackstructurefake05" },
+        "height=6": { "model": "oft:trackstructurefake06" },
+        "height=7": { "model": "oft:trackstructurefake07" },
+        "height=8": { "model": "oft:trackstructurefake08" },
+        "height=9": { "model": "oft:trackstructurefake09" },
+        "height=10": { "model": "oft:trackstructurefake10" },
+        "height=11": { "model": "oft:trackstructurefake11" },
+        "height=12": { "model": "oft:trackstructurefake12" },
+        "height=13": { "model": "oft:trackstructurefake13" },
+        "height=14": { "model": "oft:trackstructurefake14" },
+        "height=15": { "model": "oft:trackstructurefake15" }
+    }
+
 }
