@@ -33,7 +33,7 @@ public class BlockTrackStructure extends BlockRotateable{
 		if(track != null){
 			if(track.curve != null){
 				if(!world.isRemote){
-					TileEntityTrackStructure otherEnd = (TileEntityTrackStructure) world.getTileEntity(track.curve.endPos);
+					TileEntityTrackStructure otherEnd = (TileEntityTrackStructure) world.getTileEntity(pos.add(track.curve.endPos));
 					if(otherEnd != null){
 						int numberTracks = (int) track.curve.pathLength;
 						while(numberTracks > 0){
