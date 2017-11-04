@@ -8,7 +8,7 @@ import net.minecraft.util.math.AxisAlignedBB;
 import net.minecraft.util.math.BlockPos;
 import net.minecraftforge.fml.relauncher.Side;
 import net.minecraftforge.fml.relauncher.SideOnly;
-import openflextrack.baseclasses.OFTCurve;
+import openflextrack.OFTCurve;
 
 public class TileEntityTrackStructure extends TileEntityRotatable{
 	public boolean hasTriedToConnectToOtherSegment;

@@ -13,7 +13,7 @@ import net.minecraft.util.ResourceLocation;
 import net.minecraft.util.math.BlockPos;
 import net.minecraft.world.World;
 import openflextrack.OFT;
-import openflextrack.baseclasses.OFTCurve;
+import openflextrack.OFTCurve;
 import openflextrack.blocks.TileEntityTrackStructure;
 import openflextrack.rendering.blockmodels.ModelTrackTie;
 

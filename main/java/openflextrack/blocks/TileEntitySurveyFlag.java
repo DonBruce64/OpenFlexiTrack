@@ -11,8 +11,8 @@ import net.minecraft.util.math.BlockPos;
 import net.minecraftforge.fml.relauncher.Side;
 import net.minecraftforge.fml.relauncher.SideOnly;
 import openflextrack.OFT;
+import openflextrack.OFTCurve;
 import openflextrack.OFTRegistry;
-import openflextrack.baseclasses.OFTCurve;
 import openflextrack.packets.TileEntitySyncPacket;
 
 public class TileEntitySurveyFlag extends TileEntityRotatable{
