@@ -47,20 +47,20 @@ public class TileEntitySurveyFlag extends TileEntityRotatable{
 	 * the coordinates of the location where an existing block is if not.
 	 */
 	public BlockPos spawnDummyTracks(){
-		OFTCurve curve = linkedCurve;
-		OFTCurve otherFlagCurve = ((TileEntitySurveyFlag) worldObj.getTileEntity(this.pos.add(linkedCurve.endPos))).linkedCurve;
-		
-		Map<BlockPos, Byte> blockMap = new HashMap<BlockPos, Byte>();
+		final OFTCurve thisFlagCurve = linkedCurve;
+		final OFTCurve otherFlagCurve = ((TileEntitySurveyFlag) worldObj.getTileEntity(this.pos.add(linkedCurve.endPos))).linkedCurve;
+		final boolean isOtherFlagAboveThisOne = thisFlagCurve.endPos.getY() >= 0;
+		final Map<BlockPos, Byte> blockMap = new HashMap<BlockPos, Byte>();
 		
 		//Need to see which end of the curve is higher.
 		//If we go top-down, the fake tracks are too high and ballast looks weird.
-		BlockPos blockingBlock = addFakeTracksToMap(curve.endPos.getY() >= 0 ? curve : otherFlagCurve, blockMap);
+		//On the other hand, if we went from the other direction we might miss ballast below the track.
+		//Steep hills tend to do this, so go in both directions just in case.
+		BlockPos blockingBlock = addFakeTracksToMap(thisFlagCurve, blockMap, this.pos);
 		if(blockingBlock != null){
 			return blockingBlock;
 		}
-		//Make sure that if we went from the other direction we wouldn't miss ballast below the track.
-		//Steep hills tend to do this.
-		blockingBlock = addFakeTracksToMap(curve.endPos.getY() <= 0 ? otherFlagCurve : curve, blockMap);
+		blockingBlock = addFakeTracksToMap(otherFlagCurve, blockMap, this.pos.add(linkedCurve.endPos));
 		if(blockingBlock != null){
 			return blockingBlock;
 		}
@@ -71,18 +71,18 @@ public class TileEntitySurveyFlag extends TileEntityRotatable{
 		}
 		
 		worldObj.setBlockState(this.pos, OFTRegistry.trackStructure.getDefaultState());
-		worldObj.setBlockState(this.pos.add(curve.endPos), OFTRegistry.trackStructure.getDefaultState());
-		TileEntityTrackStructure startTile = new TileEntityTrackStructure(curve);
+		worldObj.setBlockState(this.pos.add(thisFlagCurve.endPos), OFTRegistry.trackStructure.getDefaultState());
+		TileEntityTrackStructure startTile = new TileEntityTrackStructure(thisFlagCurve);
 		TileEntityTrackStructure endTile = new TileEntityTrackStructure(otherFlagCurve);
 		startTile.setFakeTracks(new ArrayList<BlockPos>(blockMap.keySet()));
 		endTile.setFakeTracks(new ArrayList<BlockPos>(blockMap.keySet()));
 		worldObj.setTileEntity(this.pos, startTile);
-		worldObj.setTileEntity(this.pos.add(curve.endPos), endTile);
+		worldObj.setTileEntity(this.pos.add(thisFlagCurve.endPos), endTile);
 		BlockTrackStructureFake.enableMainTrackBreakage();
 		return null;
 	}
 	
-	private BlockPos addFakeTracksToMap(OFTCurve curve, Map<BlockPos, Byte> blockMap){
+	private BlockPos addFakeTracksToMap(OFTCurve curve, Map<BlockPos, Byte> blockMap, BlockPos curveOffset){
 		float[] currentPoint;		
 		float currentAngle;
 		float currentSin;
@@ -99,9 +99,9 @@ public class TileEntitySurveyFlag extends TileEntityRotatable{
 			currentPoint[1] += 1/16F;
 
 			for(byte j=-1; j<=1; ++j){
-				BlockPos placementPos = new BlockPos(Math.round(currentPoint[0] - 0.5 + j*currentCos), currentPoint[1], Math.round(currentPoint[2] - 0.5 + j*currentSin)).add(this.pos);
+				BlockPos placementPos = new BlockPos(Math.round(currentPoint[0] - 0.5 + j*currentCos), currentPoint[1], Math.round(currentPoint[2] - 0.5 + j*currentSin)).add(curveOffset);
 				if(!worldObj.getBlockState(placementPos).getBlock().canPlaceBlockAt(worldObj, placementPos)){
-					if(!(this.pos.equals(placementPos) || this.pos.add(curve.endPos).equals(placementPos))){
+					if(!(curveOffset.equals(placementPos) || curveOffset.add(curve.endPos).equals(placementPos))){
 						return placementPos;
 					}
 				}
@@ -124,13 +124,13 @@ public class TileEntitySurveyFlag extends TileEntityRotatable{
 				//This is needed for diagonals to have fake tracks in the joins.
 				//Do this for the start and end of this curve.
 				if(curve.startAngle%90 != 0){
-					BlockPos blocker = addSpacersToMap(this.pos, blockMap);
+					BlockPos blocker = addSpacersToMap(curveOffset, blockMap);
 					if(blocker != null){
 						return blocker;
 					}
 				}
 				if(curve.endAngle%90 != 0){
-					BlockPos blocker = addSpacersToMap(this.pos.add(curve.endPos), blockMap);
+					BlockPos blocker = addSpacersToMap(curveOffset.add(curve.endPos), blockMap);
 					if(blocker != null){
 						return blocker;
 					}
