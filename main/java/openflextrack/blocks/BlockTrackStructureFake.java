@@ -51,6 +51,7 @@ public class BlockTrackStructureFake extends Block{
 			if(masterPos != null){
 				firstBrokenBlockPos = pos;
 				world.setBlockToAir(masterPos);
+				firstBrokenBlockPos = null;
 			}
 		}
 		super.breakBlock(world, pos, state);
