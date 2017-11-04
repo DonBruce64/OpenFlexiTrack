@@ -12,7 +12,6 @@ import net.minecraft.entity.player.EntityPlayer;
 import net.minecraft.entity.player.EntityPlayerMP;
 import net.minecraft.item.Item;
 import net.minecraft.item.ItemStack;
-import net.minecraft.nbt.NBTTagCompound;
 import net.minecraft.util.EnumFacing;
 import net.minecraft.util.EnumHand;
 import net.minecraft.util.math.AxisAlignedBB;
@@ -55,8 +54,9 @@ public class BlockSurveyFlag extends BlockRotateable{
 			if(!player.isSneaking() && player.getHeldItemMainhand() != null){
 				if(OFTRegistry.track.equals(player.getHeldItemMainhand().getItem())){
 					if(tile.linkedCurve != null){
+						final int trackLength = Math.round(tile.linkedCurve.pathLength);
 						if(!player.capabilities.isCreativeMode){
-							if(getQtyOfItemPlayerHas(player, OFTRegistry.track, -1) <  Math.round(tile.linkedCurve.pathLength)){
+							if(getQtyOfItemPlayerHas(player, OFTRegistry.track, -1) < trackLength){
 								OFT.OFTNet.sendTo(new ChatPacket("interact.flag.failure.materials", " " + String.valueOf((int) Math.round(tile.linkedCurve.pathLength))), (EntityPlayerMP) player);
 								return;
 							}
@@ -66,7 +66,7 @@ public class BlockSurveyFlag extends BlockRotateable{
 							OFT.OFTNet.sendTo(new ChatPacket("interact.flag.failure.blockage", " X:" + blockingPos.getX() + " Y:" + blockingPos.getY() + " Z:" + blockingPos.getZ()), (EntityPlayerMP) player);
 						}else{
 							if(!player.capabilities.isCreativeMode){
-								removeQtyOfItemsFromPlayer(player, OFTRegistry.track, -1, Math.round(tile.linkedCurve.pathLength));
+								removeQtyOfItemsFromPlayer(player, OFTRegistry.track, -1, trackLength);
 							}
 						}
 					}else{
@@ -131,9 +131,8 @@ public class BlockSurveyFlag extends BlockRotateable{
 							amountToRemove -= stack.stackSize;
 							player.inventory.removeStackFromSlot(i);
 						}else{
-							ItemStack deductedStack = new ItemStack(stack.getItem(), stack.stackSize - amountToRemove, stack.getItemDamage());
-							deductedStack.readFromNBT(stack.writeToNBT(new NBTTagCompound()));
-							player.inventory.setInventorySlotContents(i, deductedStack);
+							stack.stackSize -= amountToRemove;
+							player.inventory.setInventorySlotContents(i, stack);
 							return;
 						}
 					}
