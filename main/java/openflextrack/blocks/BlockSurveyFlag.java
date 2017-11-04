@@ -29,8 +29,7 @@ public class BlockSurveyFlag extends BlockRotateable{
 	
 	public BlockSurveyFlag(){
 		super(Material.WOOD);
-		this.setHardness(2.0F);
-		this.setResistance(10.0F);
+		this.setHardness(0.0F);
 	}
 	
 	@Override
