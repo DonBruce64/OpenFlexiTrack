@@ -50,7 +50,7 @@ public class RenderTrack extends TileEntitySpecialRenderer{
 				return;
 			}
 			TileEntityTrackStructure otherEnd = (TileEntityTrackStructure) trackTileEntity;
-			
+
 			//Quick check to see if connection is still valid.
 			if(track.connectedTrack != null){
 				if(track.connectedTrack.isInvalid()){
@@ -58,7 +58,7 @@ public class RenderTrack extends TileEntitySpecialRenderer{
 					track.hasTriedToConnectToOtherSegment = false;
 				}
 			}
-			
+
 			//If this Tile Entity is not connected, and has not tried to connect, do so now.
 			if(!track.hasTriedToConnectToOtherSegment){
 				track.hasTriedToConnectToOtherSegment = connectToAdjacentTracks(track);
@@ -68,8 +68,7 @@ public class RenderTrack extends TileEntitySpecialRenderer{
 			if(otherEnd != null){
 				//Try to keep the same track rendering if possible.
 				//If the track isn't null, render that one instead.
-				boolean renderFromOtherEnd = otherEnd.getPos().getX() != track.getPos().getX() ? otherEnd.getPos().getX() > track.getPos().getX() : otherEnd.getPos().getZ() > track.getPos().getZ(); 
-				if(renderFromOtherEnd){
+				if(isTrackPrimary(otherEnd, track)){
 					this.renderTileEntityAt(otherEnd, x + otherEnd.getPos().getX() - track.getPos().getX(), y + otherEnd.getPos().getY() - track.getPos().getY(), z + otherEnd.getPos().getZ() - track.getPos().getZ(), partialTicks, destroyStage);
 					return;
 				}
@@ -127,9 +126,21 @@ public class RenderTrack extends TileEntitySpecialRenderer{
 	}
 	
 	/**
+	 * Tests if a track is primary.  Used for ordering of rendering.
+	 */
+	private static boolean isTrackPrimary(TileEntityTrackStructure track1, TileEntityTrackStructure track2){
+		return isPositionPrimary(track1.getPos(), track2.getPos());
+	}
+	
+	private static boolean isPositionPrimary(BlockPos pos1, BlockPos pos2){
+		return pos1.getX() != pos2.getX() ? pos1.getX() > pos2.getX() : pos1.getZ() > pos2.getZ();
+	}
+	
+	
+	/**
 	 * This can be called to render track anywhere in the code, not just from this class.
 	 */
-	public static void renderTrackSegmentFromCurve(World world, BlockPos startPos, OFTCurve curve, boolean holographic, TileEntityTrackStructure startConnector, TileEntityTrackStructure endConnector){
+	public static void renderTrackSegmentFromCurve(World world, BlockPos startPos, OFTCurve curve, boolean holographic, TileEntityTrackStructure trackConnectedToStart, TileEntityTrackStructure trackConnectedToEnd){
 		final float offset = 0.65F;
 		float textureOffset = 0;
 		List<float[]> texPoints = new ArrayList<float[]>();
@@ -137,26 +148,30 @@ public class RenderTrack extends TileEntitySpecialRenderer{
 		float currentAngle;
 		
 		//First get information about what connectors need rendering.
+		//The idea here is to only have the connections rendered by one track.
+		//In this case, the track that has the highest X or Z is responsible for rendering connections to other tracks.
+		//If a track is only half-rendered (other end is out of sight) it doesn't count.
 		boolean renderStartTie = false;
 		boolean renderStartRail = false;
 		boolean renderStartRailExtra = false;
-		TileEntityTrackStructure startConnectorMaster = null;
-		if(startConnector != null){
-			if(startConnector.curve != null){	
-				startConnectorMaster = (TileEntityTrackStructure) world.getTileEntity(startConnector.getPos().add(startConnector.curve.endPos));
-				if(startConnectorMaster != null){
-					boolean renderFromOtherEnd = startConnectorMaster.getPos().getX() != startConnector.getPos().getX() ? startConnectorMaster.getPos().getX() > startConnector.getPos().getX() : startConnectorMaster.getPos().getZ() > startConnector.getPos().getZ();
-					if(renderFromOtherEnd){
-						//Start connecter is the end of a rail.  Test for tie space.
-						if(startConnectorMaster.curve != null){
-							renderStartRailExtra = true;
-							if(startConnectorMaster.curve.pathLength%offset > offset/2){
+		TileEntityTrackStructure trackConnectedToStartOtherEnd = null;
+		if(trackConnectedToStart != null){
+			if(trackConnectedToStart.curve != null){
+				if(isPositionPrimary(trackConnectedToStart.getPos(), startPos.add(curve.endPos))){
+					//Connector is the primary for this track and needs to render.
+					trackConnectedToStartOtherEnd = (TileEntityTrackStructure) world.getTileEntity(trackConnectedToStart.getPos().add(trackConnectedToStart.curve.endPos));
+					if(trackConnectedToStartOtherEnd != null && isTrackPrimary(trackConnectedToStartOtherEnd, trackConnectedToStart)){
+						//Other end will be the master render and start of the rendering curve.
+						renderStartRailExtra = true;
+						if(trackConnectedToStartOtherEnd.curve != null){
+							if(trackConnectedToStartOtherEnd.curve.pathLength%offset + curve.pathLength%offset> offset/2){
 								renderStartTie = true;
-							}
+							}	
 						}
+					}else{
+						//This end is the primary.  Just add an extra rail segment to the end of this curve.
+						renderStartRail = true;
 					}
-				}else{
-					renderStartRail = true;
 				}
 			}
 		}
@@ -164,34 +179,39 @@ public class RenderTrack extends TileEntitySpecialRenderer{
 		boolean renderEndTie = false;
 		boolean renderEndRail = false;
 		boolean renderEndRailExtra = false;
-		TileEntityTrackStructure endConnectorMaster = null;
-		if(endConnector != null){
-			if(endConnector.curve != null){
-				endConnectorMaster = (TileEntityTrackStructure) world.getTileEntity(endConnector.getPos().add(endConnector.curve.endPos));
-				if(endConnectorMaster != null){
-					boolean renderFromOtherEnd = endConnectorMaster.getPos().getX() != endConnector.getPos().getX() ? endConnectorMaster.getPos().getX() > endConnector.getPos().getX() : endConnectorMaster.getPos().getZ() > endConnector.getPos().getZ();
-					if(renderFromOtherEnd){
-						//End connecter is the end of a rail.  Test for tie space.
-						if(endConnectorMaster.curve != null){
-							renderEndRailExtra = true;
-							if(endConnectorMaster.curve.pathLength%offset + curve.pathLength%offset > offset/2){
+		TileEntityTrackStructure trackConnectedToEndOtherEnd = null;
+		
+		if(trackConnectedToEnd != null){
+			if(trackConnectedToEnd.curve != null){
+				if(isPositionPrimary(trackConnectedToEnd.getPos(), startPos.add(curve.endPos))){
+					//Connector is the primary for this track and needs to render.
+					trackConnectedToEndOtherEnd = (TileEntityTrackStructure) world.getTileEntity(trackConnectedToEnd.getPos().add(trackConnectedToEnd.curve.endPos));
+					if(trackConnectedToEndOtherEnd != null && isTrackPrimary(trackConnectedToEndOtherEnd, trackConnectedToEnd)){
+						//Other end will be the master render and start of the rendering curve.
+						renderEndRailExtra = true;
+						if(trackConnectedToEndOtherEnd.curve != null){
+							if(trackConnectedToEndOtherEnd.curve.pathLength%offset + curve.pathLength%offset> offset/2){
 								renderEndTie = true;
-							}
+							}	
 						}
+					}else{
+						//This end is the primary.  Just add an extra rail segment to the end of this curve.
+						renderEndRail = true;
 					}
-				}else{
-					renderEndRail = true;
 				}
 			}
-		}	
+		}
 		
 		//Get an extra start rail segment if needed.
 		if(renderStartRailExtra){
 			//Get the remainder of what rails have not been rendered and add that point.
-			float lastPointOnCurve = (startConnectorMaster.curve.pathLength - (startConnectorMaster.curve.pathLength%offset))/startConnectorMaster.curve.pathLength;
-			currentPoint = startConnectorMaster.curve.getCachedPointAt(lastPointOnCurve);
-			currentAngle = startConnectorMaster.curve.getCachedYawAngleAt(lastPointOnCurve);
-			textureOffset = (float) -(Math.hypot(currentPoint[0] - startConnector.getPos().getX(), currentPoint[2] - startConnector.getPos().getZ()) + Math.hypot(startConnector.getPos().getX(), startConnector.getPos().getZ()));
+			float lastPointOnCurve = (trackConnectedToStartOtherEnd.curve.pathLength - (trackConnectedToStartOtherEnd.curve.pathLength%offset))/trackConnectedToStartOtherEnd.curve.pathLength;			
+			currentPoint = new float[3];
+			currentPoint[0] = trackConnectedToStartOtherEnd.curve.getCachedPointAt(lastPointOnCurve)[0] + trackConnectedToStartOtherEnd.getPos().getX() - startPos.getX();
+			currentPoint[1] = trackConnectedToStartOtherEnd.curve.getCachedPointAt(lastPointOnCurve)[1] + trackConnectedToStartOtherEnd.getPos().getY() - startPos.getY();
+			currentPoint[2] = trackConnectedToStartOtherEnd.curve.getCachedPointAt(lastPointOnCurve)[2] + trackConnectedToStartOtherEnd.getPos().getZ() - startPos.getZ();
+			currentAngle = trackConnectedToStartOtherEnd.curve.getCachedYawAngleAt(lastPointOnCurve);
+			textureOffset = (float) -(Math.hypot(currentPoint[0] - trackConnectedToStart.getPos().getX(), currentPoint[2] - trackConnectedToStart.getPos().getZ()) + Math.hypot(trackConnectedToStart.getPos().getX(), trackConnectedToStart.getPos().getZ()));
 			texPoints.add(new float[]{
 				currentPoint[0],
 				currentPoint[1] + 0.1875F,
@@ -205,8 +225,11 @@ public class RenderTrack extends TileEntitySpecialRenderer{
 		
 		//Get a start tie if needed.
 		if(renderStartTie || (renderStartRail && !renderStartRailExtra)){
-			currentPoint = startConnector.curve.getCachedPointAt(0);
-			currentAngle = (startConnector.curve.getCachedYawAngleAt(0) +180)%360;
+			currentPoint = new float[3];
+			currentPoint[0] =  trackConnectedToStart.getPos().getX() - startPos.getX() + 0.5F;
+			currentPoint[1] =  trackConnectedToStart.getPos().getY() - startPos.getY();
+			currentPoint[2] =  trackConnectedToStart.getPos().getZ() - startPos.getZ() + 0.5F;
+			currentAngle = (trackConnectedToStart.curve.getCachedYawAngleAt(0) +180)%360;
 			textureOffset = (float) -Math.hypot(currentPoint[0], currentPoint[2]);
 			texPoints.add(new float[]{
 				currentPoint[0],
@@ -228,6 +251,7 @@ public class RenderTrack extends TileEntitySpecialRenderer{
 			}else{
 				textureOffset = 0;
 			}
+			//System.out.println(currentPoint[0]);
 			texPoints.add(new float[]{
 				currentPoint[0],
 				currentPoint[1] + 0.1875F,
@@ -238,11 +262,14 @@ public class RenderTrack extends TileEntitySpecialRenderer{
                 world.getCombinedLight(new BlockPos((int) Math.ceil(currentPoint[0]), (int) Math.ceil(currentPoint[1]), (int) Math.ceil(currentPoint[2])).add(startPos), 0)
 			});
 		}
-		
+
 		//Get an end tie if needed.
 		if(renderEndTie || (renderEndRail && !renderEndRailExtra)){
-			currentPoint = endConnector.curve.getCachedPointAt(0);
-			currentAngle = endConnector.curve.startAngle;
+			currentPoint = new float[3];
+			currentPoint[0] =  trackConnectedToEnd.getPos().getX() - startPos.getX() + 0.5F;
+			currentPoint[1] =  trackConnectedToEnd.getPos().getY() - startPos.getY();
+			currentPoint[2] =  trackConnectedToEnd.getPos().getZ() - startPos.getZ() + 0.5F;
+			currentAngle = trackConnectedToEnd.curve.startAngle;
 			textureOffset += (float) Math.hypot(currentPoint[0] - texPoints.get(texPoints.size() - 1)[0], currentPoint[2] - texPoints.get(texPoints.size() - 1)[2]);
 			texPoints.add(new float[]{
 				currentPoint[0],
@@ -258,9 +285,13 @@ public class RenderTrack extends TileEntitySpecialRenderer{
 		//Get an extra end rail segment if needed.
 		if(renderEndRailExtra){
 			//Get the remainder of what rails have not been rendered and add that point.
-			float lastPointOnCurve = (endConnectorMaster.curve.pathLength - (endConnectorMaster.curve.pathLength%offset))/endConnectorMaster.curve.pathLength;
-			currentPoint = endConnectorMaster.curve.getCachedPointAt(lastPointOnCurve);
-			currentAngle = (endConnectorMaster.curve.getCachedYawAngleAt(lastPointOnCurve) + 180)%360;
+			float lastPointOnCurve = (trackConnectedToEndOtherEnd.curve.pathLength - (trackConnectedToEndOtherEnd.curve.pathLength%offset))/trackConnectedToEndOtherEnd.curve.pathLength;
+			currentPoint = new float[3];
+			currentPoint = new float[3];
+			currentPoint[0] = trackConnectedToEndOtherEnd.curve.getCachedPointAt(lastPointOnCurve)[0] + trackConnectedToEndOtherEnd.getPos().getX() - startPos.getX();
+			currentPoint[1] = trackConnectedToEndOtherEnd.curve.getCachedPointAt(lastPointOnCurve)[1] + trackConnectedToEndOtherEnd.getPos().getY() - startPos.getY();
+			currentPoint[2] = trackConnectedToEndOtherEnd.curve.getCachedPointAt(lastPointOnCurve)[2] + trackConnectedToEndOtherEnd.getPos().getZ() - startPos.getZ();
+			currentAngle = (trackConnectedToEndOtherEnd.curve.getCachedYawAngleAt(lastPointOnCurve) + 180)%360;
 			textureOffset += (float) Math.hypot(currentPoint[0] - texPoints.get(texPoints.size() - 1)[0], currentPoint[2] - texPoints.get(texPoints.size() - 1)[2]);
 			texPoints.add(new float[]{
 				currentPoint[0],
@@ -291,7 +322,7 @@ public class RenderTrack extends TileEntitySpecialRenderer{
 		if(renderEndTie){
 			GL11.glPushMatrix();
 			GL11.glTranslatef(texPoints.get(texPoints.size() - 2)[0], texPoints.get(texPoints.size() - 2)[1] - 0.1875F, texPoints.get(texPoints.size() - 2)[2]);
-			GL11.glRotatef(-endConnector.curve.startAngle, 0, 1, 0);
+			GL11.glRotatef(-trackConnectedToEnd.curve.startAngle, 0, 1, 0);
 			renderTie(texPoints.get(texPoints.size() - 2)[6], holographic);
 			GL11.glPopMatrix();
 		}
