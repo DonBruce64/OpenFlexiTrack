@@ -111,7 +111,6 @@ public class TileEntitySurveyFlag extends TileEntityRotatable{
 					break;
 				}
 				if(!isBlockInList){
-					System.out.println(currentPoint[1]%1*16F);
 					if(currentPoint[1] >= 0){						
 						blockMap.put(placementPos, (byte) (currentPoint[1]%1*16F));
 					}else{
