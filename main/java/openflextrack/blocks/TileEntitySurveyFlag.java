@@ -111,7 +111,13 @@ public class TileEntitySurveyFlag extends TileEntityRotatable{
 					break;
 				}
 				if(!isBlockInList){
-					blockMap.put(placementPos, (byte) (currentPoint[1]%1*16F));
+					System.out.println(currentPoint[1]%1*16F);
+					if(currentPoint[1] >= 0){						
+						blockMap.put(placementPos, (byte) (currentPoint[1]%1*16F));
+					}else{
+						//Going from top-down on a slope.  Invert Y.
+						blockMap.put(placementPos, (byte) (16 + currentPoint[1]%1*16F));
+					}
 					//Double-check to see if there's a block already in the list below this one.
 					//If so, we're on a slope and that block needs a height of 16.
 					if(blockMap.containsKey(placementPos.down())){
