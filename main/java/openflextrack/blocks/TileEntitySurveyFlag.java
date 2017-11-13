@@ -17,11 +17,11 @@ import openflextrack.packets.TileEntitySyncPacket;
 
 public class TileEntitySurveyFlag extends TileEntityRotatable{
 	public OFTCurve linkedCurve;
-		
+
 	public TileEntitySurveyFlag(){
 		super();
 	}
-	
+
 	public void linkToFlag(BlockPos linkedFlagPos){
 		if(linkedCurve != null){
 			((TileEntitySurveyFlag) worldObj.getTileEntity(linkedCurve.endPos.add(this.pos))).clearFlagLinking();
@@ -30,7 +30,7 @@ public class TileEntitySurveyFlag extends TileEntityRotatable{
 		linkedCurve = new OFTCurve(linkedFlagPos.subtract(this.pos), rotation*45, linkedFlag.rotation*45);
 		OFT.OFTNet.sendToAll(new TileEntitySyncPacket(this));
 	}
-	
+
 	public void clearFlagLinking(){
 		if(linkedCurve != null){
 			TileEntitySurveyFlag linkedFlag = ((TileEntitySurveyFlag) worldObj.getTileEntity(linkedCurve.endPos.add(this.pos)));
@@ -41,7 +41,7 @@ public class TileEntitySurveyFlag extends TileEntityRotatable{
 			OFT.OFTNet.sendToAll(new TileEntitySyncPacket(this));
 		}
 	}
-	
+
 	/**
 	 * Spawns dummy tracks based on flag linking.  Returns null if successful or
 	 * the coordinates of the location where an existing block is if not.
@@ -49,9 +49,8 @@ public class TileEntitySurveyFlag extends TileEntityRotatable{
 	public BlockPos spawnDummyTracks(){
 		final OFTCurve thisFlagCurve = linkedCurve;
 		final OFTCurve otherFlagCurve = ((TileEntitySurveyFlag) worldObj.getTileEntity(this.pos.add(linkedCurve.endPos))).linkedCurve;
-		final boolean isOtherFlagAboveThisOne = thisFlagCurve.endPos.getY() >= 0;
 		final Map<BlockPos, Byte> blockMap = new HashMap<BlockPos, Byte>();
-		
+
 		//Need to see which end of the curve is higher.
 		//If we go top-down, the fake tracks are too high and ballast looks weird.
 		//On the other hand, if we went from the other direction we might miss ballast below the track.
@@ -64,12 +63,12 @@ public class TileEntitySurveyFlag extends TileEntityRotatable{
 		if(blockingBlock != null){
 			return blockingBlock;
 		}
-		
+
 		BlockTrackStructureFake.disableMainTrackBreakage();
 		for(BlockPos placementPos : blockMap.keySet()){
 			worldObj.setBlockState(placementPos, OFTRegistry.trackStructureFake.getDefaultState().withProperty(BlockTrackStructureFake.height, (int) blockMap.get(placementPos)));			
 		}
-		
+
 		worldObj.setBlockState(this.pos, OFTRegistry.trackStructure.getDefaultState());
 		worldObj.setBlockState(this.pos.add(thisFlagCurve.endPos), OFTRegistry.trackStructure.getDefaultState());
 		TileEntityTrackStructure startTile = new TileEntityTrackStructure(thisFlagCurve);
@@ -81,13 +80,13 @@ public class TileEntitySurveyFlag extends TileEntityRotatable{
 		BlockTrackStructureFake.enableMainTrackBreakage();
 		return null;
 	}
-	
+
 	private BlockPos addFakeTracksToMap(OFTCurve curve, Map<BlockPos, Byte> blockMap, BlockPos curveOffset){
 		float[] currentPoint;		
 		float currentAngle;
 		float currentSin;
 		float currentCos;
-		
+
 		for(float f=0; f <= curve.pathLength; f = Math.min(f + 0.05F, curve.pathLength)){
 			currentPoint = curve.getCachedPointAt(f/curve.pathLength);
 			currentAngle = curve.getCachedYawAngleAt(f/curve.pathLength);
@@ -145,7 +144,7 @@ public class TileEntitySurveyFlag extends TileEntityRotatable{
 		}
 		return null;
 	}
-	
+
 	private BlockPos addSpacersToMap(BlockPos posToCheckAround, Map<BlockPos, Byte> blockMap){
 		for(byte i=-1; i<=1; ++i){
 			for(byte j=-1; j<=1; ++j){
@@ -155,9 +154,8 @@ public class TileEntitySurveyFlag extends TileEntityRotatable{
 						Block blockingBlock = worldObj.getBlockState(testPos).getBlock();
 						if(blockingBlock.equals(OFTRegistry.trackStructure) || blockingBlock.equals(OFTRegistry.trackStructureFake)){
 							continue;
-						}else{
-							return testPos;
 						}
+						return testPos;
 					}else if(!blockMap.containsKey(testPos)){
 						blockMap.put(testPos, (byte) 1);
 					}
@@ -166,36 +164,36 @@ public class TileEntitySurveyFlag extends TileEntityRotatable{
 		}
 		return null;
 	}
-	
+
 	@Override
 	public AxisAlignedBB getRenderBoundingBox(){
 		return INFINITE_EXTENT_AABB;
 	}
-	
+
 	@Override
-    @SideOnly(Side.CLIENT)
-    public double getMaxRenderDistanceSquared(){
-        return 65536.0D;
-    }
-	
+	@SideOnly(Side.CLIENT)
+	public double getMaxRenderDistanceSquared(){
+		return 65536.0D;
+	}
+
 	@Override
-    public void readFromNBT(NBTTagCompound tagCompound){
-        super.readFromNBT(tagCompound);
-        int[] linkedFlagCoords = tagCompound.getIntArray("linkedFlagCoords");
-        if(tagCompound.getIntArray("linkedFlagCoords").length != 0){
-        	linkedCurve = new OFTCurve(new BlockPos(linkedFlagCoords[0], linkedFlagCoords[1], linkedFlagCoords[2]).subtract(this.pos), this.rotation*45, tagCompound.getFloat("linkedFlagAngle"));
-        }else{
-        	linkedCurve = null;
-        }
-    }
-    
+	public void readFromNBT(NBTTagCompound tagCompound){
+		super.readFromNBT(tagCompound);
+		int[] linkedFlagCoords = tagCompound.getIntArray("linkedFlagCoords");
+		if(tagCompound.getIntArray("linkedFlagCoords").length != 0){
+			linkedCurve = new OFTCurve(new BlockPos(linkedFlagCoords[0], linkedFlagCoords[1], linkedFlagCoords[2]).subtract(this.pos), this.rotation*45, tagCompound.getFloat("linkedFlagAngle"));
+		}else{
+			linkedCurve = null;
+		}
+	}
+
 	@Override
-    public NBTTagCompound writeToNBT(NBTTagCompound tagCompound){
-        super.writeToNBT(tagCompound);
-        if(linkedCurve != null){
-        	tagCompound.setIntArray("linkedFlagCoords", new int[]{linkedCurve.endPos.getX() + this.pos.getX(), linkedCurve.endPos.getY() + this.pos.getY(), linkedCurve.endPos.getZ() + this.pos.getZ()});
-        	tagCompound.setFloat("linkedFlagAngle", linkedCurve.endAngle);
-        }
-        return tagCompound;
-    }
+	public NBTTagCompound writeToNBT(NBTTagCompound tagCompound){
+		super.writeToNBT(tagCompound);
+		if(linkedCurve != null){
+			tagCompound.setIntArray("linkedFlagCoords", new int[]{linkedCurve.endPos.getX() + this.pos.getX(), linkedCurve.endPos.getY() + this.pos.getY(), linkedCurve.endPos.getZ() + this.pos.getZ()});
+			tagCompound.setFloat("linkedFlagAngle", linkedCurve.endAngle);
+		}
+		return tagCompound;
+	}
 }

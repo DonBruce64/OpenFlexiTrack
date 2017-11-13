@@ -33,17 +33,16 @@ public class BlockTrackStructureFake extends Block{
 		this.setDefaultState(this.blockState.getBaseState().withProperty(height, 15));
 		this.fullBlock = false;
 	}
-	
+
 	@Override
 	public ItemStack getPickBlock(IBlockState state, RayTraceResult target, World world, BlockPos pos, EntityPlayer player){
 		BlockPos masterPos = getMasterPos(world, pos);
 		if(masterPos != null){
 			return world.getBlockState(masterPos).getBlock().getPickBlock(world.getBlockState(masterPos), target, world, masterPos, player);
-		}else{
-			return null;
 		}
-    }	
-	
+		return null;
+	}	
+
 	@Override
 	public void breakBlock(World world, BlockPos pos, IBlockState state){
 		if(shouldTryToBreakTrackWhenBroken){
@@ -56,13 +55,13 @@ public class BlockTrackStructureFake extends Block{
 		}
 		super.breakBlock(world, pos, state);
 	}
-	
+
 	public BlockPos getMasterPos(World world, final BlockPos thisPos){
 		List<BlockPos> testedBlocks = new ArrayList<BlockPos>();
 		List<BlockPos> blocksToTest = new ArrayList<BlockPos>();
 		testedBlocks.add(thisPos);
 		blocksToTest.add(thisPos);
-		
+
 		while(blocksToTest.size() > 0){
 			if(blocksToTest.size() > 0){
 				BlockPos testingPos = blocksToTest.get(0);
@@ -99,57 +98,57 @@ public class BlockTrackStructureFake extends Block{
 	}
 
 	@Override
-    public Item getItemDropped(IBlockState state, Random rand, int fortune){
-        return null;
-    }
-	
+	public Item getItemDropped(IBlockState state, Random rand, int fortune){
+		return null;
+	}
+
 	@Override
 	protected BlockStateContainer createBlockState(){
-        return new BlockStateContainer(this, height);
-    }
-	
+		return new BlockStateContainer(this, height);
+	}
+
 	@Override
 	public int getMetaFromState(IBlockState state){
 		return state.getValue(height);
 	}
-	
+
 	//Depreciated, but correct so say master modders.
 	@Override
-    @SuppressWarnings("deprecation")
-    public IBlockState getStateFromMeta(int meta){
-        return this.getDefaultState().withProperty(height, meta);
-    }
-	
-    @Override
-    @SuppressWarnings("deprecation")
-    public boolean isOpaqueCube(IBlockState state){
-        return false;
-    }
-    
-    @Override
-    @SuppressWarnings("deprecation")
-    public boolean isFullCube(IBlockState state){
-        return false;
-    }
+	@Deprecated
+	public IBlockState getStateFromMeta(int meta){
+		return this.getDefaultState().withProperty(height, meta);
+	}
 
 	@Override
-	@SuppressWarnings("deprecation")
+	@Deprecated
+	public boolean isOpaqueCube(IBlockState state){
+		return false;
+	}
+
+	@Override
+	@Deprecated
+	public boolean isFullCube(IBlockState state){
+		return false;
+	}
+
+	@Override
+	@Deprecated
 	public AxisAlignedBB getBoundingBox(IBlockState state, IBlockAccess source, BlockPos pos){
 		return heightBoxes[state.getValue(height)];
 	}
-	
+
 	public static void enableMainTrackBreakage(){
 		shouldTryToBreakTrackWhenBroken = true;
 	}
-	
+
 	public static void disableMainTrackBreakage(){
 		shouldTryToBreakTrackWhenBroken = false;
 	}
-	
+
 	public static BlockPos getLastHitFakeTrack(){
 		return firstBrokenBlockPos;
 	}
-	
+
 	private static AxisAlignedBB[] initHeightBoxes(){
 		AxisAlignedBB[] heightBoxes = new AxisAlignedBB[16];
 		for(byte i=0; i<16; ++i){

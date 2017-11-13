@@ -26,12 +26,12 @@ public class BlockSurveyFlag extends BlockRotateable{
 	private static final AxisAlignedBB blockBox = new AxisAlignedBB(0.4375F, 0.0F, 0.4375F, 0.5625F, 1.0F, 0.5625F);
 	private static final Map<EntityPlayer, BlockPos> firstPosition = new HashMap<EntityPlayer, BlockPos>();
 	private static final Map<EntityPlayer, Integer> firstDimension = new HashMap<EntityPlayer, Integer>();
-	
+
 	public BlockSurveyFlag(){
 		super(Material.WOOD);
 		this.setHardness(0.0F);
 	}
-	
+
 	@Override
 	public void onBlockPlacedBy(World world, BlockPos pos, IBlockState state, EntityLivingBase entity, ItemStack stack){
 		super.onBlockPlacedBy(world, pos, state, entity, stack);
@@ -39,15 +39,15 @@ public class BlockSurveyFlag extends BlockRotateable{
 			linkFlags(world, pos, (EntityPlayer) entity);
 		}
 	}
-	
-	
+
+
 	@Override
 	public boolean onBlockActivated(World world, BlockPos pos, IBlockState state, EntityPlayer player, EnumHand hand, @Nullable ItemStack heldItem, EnumFacing side, float hitX, float hitY, float hitZ){
 		linkFlags(world, pos, player);
 		return true;
 	}
-	
-	private void linkFlags(World world, BlockPos pos, EntityPlayer player){
+
+	private static void linkFlags(World world, BlockPos pos, EntityPlayer player){
 		if(!world.isRemote){
 			TileEntitySurveyFlag tile = (TileEntitySurveyFlag) world.getTileEntity(pos);
 			if(!player.isSneaking() && player.getHeldItemMainhand() != null){
@@ -56,7 +56,7 @@ public class BlockSurveyFlag extends BlockRotateable{
 						final int trackLength = Math.round(tile.linkedCurve.pathLength);
 						if(!player.capabilities.isCreativeMode){
 							if(getQtyOfItemPlayerHas(player, OFTRegistry.track, -1) < trackLength){
-								OFT.OFTNet.sendTo(new ChatPacket("interact.flag.failure.materials", " " + String.valueOf((int) Math.round(tile.linkedCurve.pathLength))), (EntityPlayerMP) player);
+								OFT.OFTNet.sendTo(new ChatPacket("interact.flag.failure.materials", " " + String.valueOf(Math.round(tile.linkedCurve.pathLength))), (EntityPlayerMP) player);
 								return;
 							}
 						}
@@ -105,8 +105,8 @@ public class BlockSurveyFlag extends BlockRotateable{
 			}
 		}
 	}
-	
-	private int getQtyOfItemPlayerHas(EntityPlayer player, Item item, int meta){
+
+	private static int getQtyOfItemPlayerHas(EntityPlayer player, Item item, int meta){
 		int qty = 0;
 		for(ItemStack stack : player.inventory.mainInventory){
 			if(stack != null){
@@ -119,8 +119,8 @@ public class BlockSurveyFlag extends BlockRotateable{
 		}
 		return qty;
 	}
-	
-	private void removeQtyOfItemsFromPlayer(EntityPlayer player, Item item, int meta, int amountToRemove){
+
+	private static void removeQtyOfItemsFromPlayer(EntityPlayer player, Item item, int meta, int amountToRemove){
 		for(int i=0; i<player.inventory.mainInventory.length; ++i){
 			ItemStack stack = player.inventory.mainInventory[i];
 			if(stack != null){
@@ -139,21 +139,21 @@ public class BlockSurveyFlag extends BlockRotateable{
 			}
 		}
 	}
-	
+
 	private static final void resetMaps(EntityPlayer player){
 		firstPosition.remove(player);
 		firstDimension.remove(player);
 	}
-	
+
 	@Override
 	public void breakBlock(World world, BlockPos pos, IBlockState state){
 		((TileEntitySurveyFlag) world.getTileEntity(pos)).clearFlagLinking();
 		super.breakBlock(world, pos, state);
 	}
-	
-	
+
+
 	@Override
-	@SuppressWarnings("deprecation")
+	@Deprecated
 	public AxisAlignedBB getBoundingBox(IBlockState state, IBlockAccess source, BlockPos pos){
 		return blockBox;
 	}

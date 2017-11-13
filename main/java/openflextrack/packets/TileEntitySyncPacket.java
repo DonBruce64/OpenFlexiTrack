@@ -44,6 +44,7 @@ public class TileEntitySyncPacket implements IMessage{
 	}
 
 	public static class Handler implements IMessageHandler<TileEntitySyncPacket, IMessage>{
+		@Override
 		public IMessage onMessage(final TileEntitySyncPacket message, final MessageContext ctx){
 			FMLCommonHandler.instance().getWorldThread(ctx.netHandler).addScheduledTask(new Runnable(){
 				@Override

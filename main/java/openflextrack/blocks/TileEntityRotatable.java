@@ -28,6 +28,4 @@ public abstract class TileEntityRotatable extends TileEntity{
         tagCompound.setByte("rotation", rotation);
         return tagCompound;
     }
-
-
 }

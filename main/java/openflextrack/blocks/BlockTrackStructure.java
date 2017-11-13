@@ -14,19 +14,19 @@ import openflextrack.OFTRegistry;
 
 public class BlockTrackStructure extends BlockRotateable{
 	private static final AxisAlignedBB blockBox = new AxisAlignedBB(0.0F, 0.0F, 0.0F, 1.0F, 0.125F, 1.0F);
-	
+
 	public BlockTrackStructure(){
 		super(Material.IRON);
 		this.setHardness(5.0F);
 		this.setResistance(10.0F);
 	}
-	
+
 	@Override
 	public ItemStack getPickBlock(IBlockState state, RayTraceResult target, World world, BlockPos pos, EntityPlayer player){
 		//TODO add track sub-types here as properties and return meta for item damage.
-        return new ItemStack(OFTRegistry.track);
-    }
-	
+		return new ItemStack(OFTRegistry.track);
+	}
+
 	@Override
 	public void breakBlock(World world, BlockPos pos, IBlockState state){
 		TileEntityTrackStructure track = (TileEntityTrackStructure) world.getTileEntity(pos);
@@ -55,9 +55,9 @@ public class BlockTrackStructure extends BlockRotateable{
 		}
 		super.breakBlock(world, pos, state);
 	}
-	
+
 	@Override
-	@SuppressWarnings("deprecation")
+	@Deprecated
 	public AxisAlignedBB getBoundingBox(IBlockState state, IBlockAccess source, BlockPos pos){
 		return blockBox;
 	}

@@ -14,7 +14,7 @@ import openflextrack.rendering.blockrenders.RenderSurveyFlag;
 import openflextrack.rendering.blockrenders.RenderTrack;
 
 public class OFTRegistryClient{
-	private static final OFTRegistryClient instance = new OFTRegistryClient();
+
 	/**Map of parsed models keyed by name.*/
 	public static final Map<String, Map<String, Float[][]>> modelMap = new HashMap<String, Map<String, Float[][]>>();
 
@@ -22,7 +22,7 @@ public class OFTRegistryClient{
 		ClientRegistry.bindTileEntitySpecialRenderer(TileEntitySurveyFlag.class, new RenderSurveyFlag());
 		ClientRegistry.bindTileEntitySpecialRenderer(TileEntityTrackStructure.class, new RenderTrack());
 	}
-	
+
 	public static void init(){
 		ItemModelMesher mesher = Minecraft.getMinecraft().getRenderItem().getItemModelMesher();
 		mesher.register(OFTRegistry.ties, 0, new ModelResourceLocation(OFT.MODID + ":" + "ties", "inventory"));

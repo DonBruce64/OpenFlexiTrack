@@ -1,0 +1,16 @@
+[
+{
+  "modid": "oft",
+  "name": "Open Flexi-Track",
+  "description": "An Open-Source Flexible Track System.",
+  "version": "1.0.0",
+  "mcversion": "1.10.2",
+  "url": "",
+  "updateUrl": "",
+  "authorList": ["don_bruce"],
+  "credits": "",
+  "logoFile": "",
+  "screenshots": [],
+  "dependencies": []
+}
+]
