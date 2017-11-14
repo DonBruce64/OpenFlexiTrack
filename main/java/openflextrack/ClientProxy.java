@@ -5,7 +5,8 @@ import net.minecraftforge.fml.common.event.FMLPreInitializationEvent;
 import net.minecraftforge.fml.relauncher.Side;
 import net.minecraftforge.fml.relauncher.SideOnly;
 
-/**Class responsible for performing client-only updates and operations.
+/**
+ * Class responsible for performing client-only updates and operations.
  * Any version-updatable, client-based method should be put in here.
  * 
  * @author don_bruce

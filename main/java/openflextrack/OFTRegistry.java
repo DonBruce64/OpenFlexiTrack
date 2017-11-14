@@ -14,33 +14,49 @@ import openflextrack.packets.ChatPacket;
 import openflextrack.packets.TileEntityClientRequestDataPacket;
 import openflextrack.packets.TileEntitySyncPacket;
 
-/**Main registry class.  This class should be referenced by any class looking for
- * MTS items or blocks.  Adding new items and blocks is a simple as adding them
- * as a field; the init method automatically registers all items and blocks in the class
+/**
+ * Main registry class. This class should be referenced by any class looking for
+ * OFT items or blocks.<br>
+ * <br>
+ * Adding new items and blocks is a simple as adding them as a field;
+ * the {@link #init()} method automatically registers all items and blocks in the class
  * and orders them according to the order in which they were declared.
- * This calls the {@link PackParserSystem} to get the custom vehicles from there.
  * 
  * @author don_bruce
  */
-public class OFTRegistry{
+public class OFTRegistry {
+
+	/*
+	 * Registry instance.
+	 */
 	public static final OFTRegistry instance = new OFTRegistry();
-	
+
+	/*
+	 * Item fields.
+	 */
 	public static final Item ties = new Item();
 	public static final Item rails = new Item();
 	public static final Item track = new Item();
+
+	/*
+	 * Block fields.
+	 */
 	public static final Block trackStructure = new BlockTrackStructure();
 	public static final Block trackStructureFake = new BlockTrackStructureFake();
 	public static final Block surveyFlag = new BlockSurveyFlag();
-		
-	/**All run-time things go here.**/
-	public void init(){
+
+	/**
+	 * All run-time things go here.
+	 */
+	public void init() {
+
 		registerItem(ties, "ties");
 		registerItem(rails, "rails");
 		registerItem(track, "track");
 		registerBlock(trackStructure, false);
 		registerBlock(trackStructureFake, false);
 		registerBlock(surveyFlag, true);
-		
+
 		int packetNumber = 0;
 		OFT.OFTNet.registerMessage(ChatPacket.Handler.class, ChatPacket.class, ++packetNumber, Side.CLIENT);
 		OFT.OFTNet.registerMessage(TileEntityClientRequestDataPacket.Handler.class, TileEntityClientRequestDataPacket.class, ++packetNumber, Side.SERVER);
@@ -49,26 +65,36 @@ public class OFTRegistry{
 	}
 
 	/**
-	 * Registers the given item.
+	 * Registers the given item with the given name and appends the mod ID before the item's name.
 	 */
-	private static void registerItem(Item item, String itemName){
-		GameRegistry.register(item.setRegistryName(itemName).setUnlocalizedName(itemName));
+	private static void registerItem(Item item, String name) {//TODO REGISTRY - Register item names with "oft." -prefix to avoid name clash between mods.
+
+		GameRegistry.register(item.setRegistryName(name).setUnlocalizedName(name));
 	}
-	
-	/**x
+
+	/**
 	 * Registers the given block.
 	 * Also adds the respective TileEntity if the block has one.
+	 * 
+	 * @param registerItemBlock - {@code true} to also register the block as item.
 	 */
-	private static void registerBlock(Block block, boolean registerItemBlock){
+	private static void registerBlock(Block block, boolean registerItemBlock) {//TODO REGISTRY - Register block names with "oft." -prefix to avoid name clash between mods.
+
+		/* Determine block's unlocalised name. */
 		String name = block.getClass().getSimpleName().toLowerCase().substring(5);
-		if(block.getRegistryName() == null){
+
+		/* Register block (and its TileEntity, if existent). */
+		if (block.getRegistryName() == null) {
 			GameRegistry.register(block.setRegistryName(name).setUnlocalizedName(name));
+
 			if(block instanceof ITileEntityProvider){
 				Class<? extends TileEntity> tileEntityClass = ((ITileEntityProvider) block).createNewTileEntity(null, 0).getClass();
 				GameRegistry.registerTileEntity(tileEntityClass, tileEntityClass.getSimpleName());
 			}
 		}
-		if(registerItemBlock && Item.getItemFromBlock(block) == null){
+
+		/* Register block's item if required. */
+		if (registerItemBlock && Item.getItemFromBlock(block) == null) {
 			GameRegistry.register(new ItemBlock(block).setRegistryName(name));
 		}
 	}

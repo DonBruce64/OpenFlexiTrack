@@ -2,7 +2,8 @@ package openflextrack;
 
 import net.minecraft.util.math.BlockPos;
 
-/**Curve class used for rails.
+/**
+ * Curve class used for rails.
  * Start point is at 0,0,0.  Offset as needed.
  * Needs an end point, a start angle, and an end angle.
  * Note that this uses Minecraft's coordinate system

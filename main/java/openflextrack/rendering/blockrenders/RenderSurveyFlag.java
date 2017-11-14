@@ -5,10 +5,13 @@ import org.lwjgl.opengl.GL11;
 import net.minecraft.client.Minecraft;
 import net.minecraft.client.renderer.tileentity.TileEntitySpecialRenderer;
 import net.minecraft.util.ResourceLocation;
+import net.minecraftforge.fml.relauncher.Side;
+import net.minecraftforge.fml.relauncher.SideOnly;
 import openflextrack.OFT;
 import openflextrack.blocks.TileEntitySurveyFlag;
 import openflextrack.rendering.blockmodels.ModelSurveyFlag;
 
+@SideOnly(Side.CLIENT)
 public class RenderSurveyFlag extends TileEntitySpecialRenderer<TileEntitySurveyFlag>{
 	private static final ModelSurveyFlag model = new ModelSurveyFlag();
 	private static final ResourceLocation texture = new ResourceLocation(OFT.MODID, "textures/blockmodels/surveyflag.png");

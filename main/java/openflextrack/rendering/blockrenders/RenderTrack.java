@@ -12,11 +12,14 @@ import net.minecraft.tileentity.TileEntity;
 import net.minecraft.util.ResourceLocation;
 import net.minecraft.util.math.BlockPos;
 import net.minecraft.world.World;
+import net.minecraftforge.fml.relauncher.Side;
+import net.minecraftforge.fml.relauncher.SideOnly;
 import openflextrack.OFT;
 import openflextrack.OFTCurve;
 import openflextrack.blocks.TileEntityTrackStructure;
 import openflextrack.rendering.blockmodels.ModelTrackTie;
 
+@SideOnly(Side.CLIENT)
 public class RenderTrack extends TileEntitySpecialRenderer<TileEntityTrackStructure>{
 	private static final ModelTrackTie modelTie = new ModelTrackTie();
 	private static final ResourceLocation tieTexture = new ResourceLocation(OFT.MODID, "textures/blockmodels/tie.png");
@@ -247,7 +250,6 @@ public class RenderTrack extends TileEntitySpecialRenderer<TileEntityTrackStruct
 			}else{
 				textureOffset = 0;
 			}
-			//System.out.println(currentPoint[0]);
 			texPoints.add(new float[]{
 					currentPoint[0],
 					currentPoint[1] + 0.1875F,
