@@ -1,103 +1,177 @@
 package openflextrack;
 
+import static java.lang.Math.atan;
+import static java.lang.Math.atan2;
+import static java.lang.Math.cos;
+import static java.lang.Math.hypot;
+import static java.lang.Math.pow;
+import static java.lang.Math.round;
+import static java.lang.Math.sin;
+import static java.lang.Math.sqrt;
+import static java.lang.Math.toDegrees;
+import static java.lang.Math.toRadians;
+
 import net.minecraft.util.math.BlockPos;
+import openflextrack.util.Vec3f;
 
 /**
- * Curve class used for rails.
- * Start point is at 0,0,0.  Offset as needed.
- * Needs an end point, a start angle, and an end angle.
- * Note that this uses Minecraft's coordinate system
- * where 0 degrees is north, not east.
+ * Curve class used for track paths.<br>
+ * <br>
+ * Start point is at origin {@code (0, 0, 0)}. Offset as needed.<br>
+ * Needs an {@link #endPos end point}, a {@link #startAngle start angle}, and an {@link #endAngle end angle}.<br>
+ * <br>
+ * Note that this uses Minecraft's coordinate system where 0 degrees is north, not east.
  * 
  * @author don_bruce
  */
-public class OFTCurve{
+public class OFTCurve {
+
+	/** Determines the number of cached curve segments. */
+	public static final byte CACHED_CURVE_INCREMENTS = 16;
+
+	/** Start point's angle around global Y. */
 	public final float startAngle;
+	/** End point's angle around global Y. */
 	public final float endAngle;
+	/** Length of overall curve path. */
 	public final float pathLength;
+	/** End point's block coordinates. */
 	public final BlockPos endPos;
-	
-	private final float cpDist;
-	private final float[] startPoint;
-	private final float[] endPoint;
-	private final float[] cpStart;
-	private final float[] cpEnd;
-	
-	private static final byte cachedCurveIncrement = 16;
-	private final float[][] cachedPathPoints;
-	
-	public OFTCurve(BlockPos ep, float sa, float ea){
+
+	/**  */
+	private final float cpDist;//TODO JavaDoc for fields with "cp" prefix.
+	/** Local start point coordinates. */
+	private final Vec3f startPoint;
+	/** Local end point coordinates. */
+	private final Vec3f endPoint;
+	/**  */
+	private final Vec3f cpStart;
+	/**  */
+	private final Vec3f cpEnd;
+
+	/** Array holding cached points on the curve path. */
+	private final Vec3f[] cachedPathPoints;
+
+
+	/**
+	 * Initialise a new curve ending at the given position with given start and end angles (in degrees).<br>
+	 * Assumes start position to be origin (see class type JavaDoc), and an angle of {@code 0°} to point to the north.
+	 * 
+	 * @param ep - {@link net.minecraft.util.math.BlockPos End position}.
+	 * @param sa - Start angle, in degrees.
+	 * @param ea - End angle, in degrees.
+	 */
+	public OFTCurve(BlockPos ep, float sa, float ea) {
+
+		/* Populate fields. */
 		this.startAngle = sa;
 		this.endAngle = ea;
 		this.endPos = ep;
-		this.startPoint = new float[]{0.5F, 0, 0.5F};
-		this.endPoint = new float[]{ep.getX() + 0.5F, ep.getY(), ep.getZ() + 0.5F};
-		cpDist = (float) Math.sqrt(Math.pow(endPoint[0] - startPoint[0], 2) + Math.pow(endPoint[1] - startPoint[1], 2) + Math.pow(endPoint[2] - startPoint[2], 2))/3F;
-		cpStart = new float[]{(float) (startPoint[0] - Math.sin(Math.toRadians(startAngle))*cpDist), startPoint[1], (float) (startPoint[2] + Math.cos(Math.toRadians(startAngle))*cpDist)};
-		cpEnd = new float[]{(float) (endPoint[0] - Math.sin(Math.toRadians(endAngle))*cpDist), endPoint[1], (float) (endPoint[2] + Math.cos(Math.toRadians(endAngle))*cpDist)};
+		this.startPoint = new Vec3f(0.5F, 0, 0.5F);
+		this.endPoint = new Vec3f(ep.getX() + 0.5F, ep.getY(), ep.getZ() + 0.5F);
+		this.cpDist = (float) (sqrt(endPoint.sqDistTo(startPoint)) / 3.0D);
 
-		this.pathLength = getPathLength(startPoint, endPoint, cpStart, cpEnd, cpDist);
-		float[] pathPointsX = getAxisCachedPathPoints(startPoint[0], endPoint[0], cpStart[0], cpEnd[0], pathLength);
-		float[] pathPointsY = getAxisCachedPathPoints(startPoint[1], endPoint[1], cpStart[1], cpEnd[1], pathLength);
-		float[] pathPointsZ = getAxisCachedPathPoints(startPoint[2], endPoint[2], cpStart[2], cpEnd[2], pathLength);
-		
-		cachedPathPoints = new float[Math.round(pathLength*cachedCurveIncrement) + 1][3];
-		for(int i=0; i<cachedPathPoints.length; ++i){
-			cachedPathPoints[i][0] = pathPointsX[i];
-			cachedPathPoints[i][1] = pathPointsY[i];
-			cachedPathPoints[i][2] = pathPointsZ[i];
+		this.cpStart = new Vec3f(
+				(float) (startPoint.x - sin(toRadians(startAngle))*cpDist),
+				startPoint.y,
+				(float) (startPoint.z + cos(toRadians(startAngle))*cpDist));
+
+		this.cpEnd = new Vec3f(
+				(float) (endPoint.x - sin(toRadians(endAngle))*cpDist),
+				endPoint.y,
+				(float) (endPoint.z + cos(toRadians(endAngle))*cpDist));
+
+		/* Compute path length. */
+		this.pathLength = this.getPathLength();
+		this.cachedPathPoints = this.getCachedPathPoints(new Vec3f[ round(pathLength*CACHED_CURVE_INCREMENTS) + 1 ]);
+	}
+
+
+	/**
+	 * Called to populate the given array of {@link openflextrack.util.Vec3f path points} with this curve's data.
+	 * 
+	 * @return The populated array.
+	 */
+	private Vec3f[] getCachedPathPoints(Vec3f[] points) {
+
+		boolean skipX = (startPoint.x == endPoint.x),
+				skipY = (startPoint.y == endPoint.y),
+				skipZ = (startPoint.z == endPoint.z);
+
+		for (int i = 0; i < points.length; ++i) {
+
+			float t = (float)i / points.length;
+			points[i] = new Vec3f(
+					getCachedPathPointVal(skipX, startPoint.x, cpStart.x, cpEnd.x, endPoint.x, t),
+					getCachedPathPointVal(skipY, startPoint.y, cpStart.y, cpEnd.y, endPoint.y, t),
+					getCachedPathPointVal(skipZ, startPoint.z, cpStart.z, cpEnd.z, endPoint.z, t)
+					);
 		}
-	}
-	
-	public float[] getPointAt(float segment){
-		return new float[]{
-			(float) (Math.pow(1-segment, 3)*startPoint[0] + 3*Math.pow(1-segment, 2)*segment*cpStart[0] + 3*(1-segment)*Math.pow(segment, 2)*cpEnd[0] + Math.pow(segment, 3)*endPoint[0]),
-			(float) (Math.pow(1-segment, 3)*startPoint[0] + 3*Math.pow(1-segment, 2)*segment*cpStart[0] + 3*(1-segment)*Math.pow(segment, 2)*cpEnd[0] + Math.pow(segment, 3)*endPoint[0]),
-			(float) (Math.pow(1-segment, 3)*startPoint[0] + 3*Math.pow(1-segment, 2)*segment*cpStart[0] + 3*(1-segment)*Math.pow(segment, 2)*cpEnd[0] + Math.pow(segment, 3)*endPoint[0])
-		};
-	}
-	
-	public float[] getCachedPointAt(float segment){
-		return cachedPathPoints[Math.round(segment*pathLength*cachedCurveIncrement)];
-	}
-	
-	public float getCachedYawAngleAt(float segment){
-		int pointIndex = Math.round(segment*pathLength*cachedCurveIncrement);
-		if(pointIndex + 1 == cachedPathPoints.length){
-			pointIndex = cachedPathPoints.length - 2;
-		}
-		return (float) (360 + Math.toDegrees(Math.atan2(cachedPathPoints[pointIndex][0] - cachedPathPoints[pointIndex + 1][0], cachedPathPoints[pointIndex + 1][2] - cachedPathPoints[pointIndex][2])))%360;
-	}
-	
-	public float getCachedPitchAngleAt(float segment){
-		int pointIndex = Math.round(segment*pathLength*cachedCurveIncrement);
-		if(pointIndex + 1 == cachedPathPoints.length){
-			pointIndex = cachedPathPoints.length - 2;
-		}
-		return (float) -Math.toDegrees(Math.atan((cachedPathPoints[pointIndex + 1][1] - cachedPathPoints[pointIndex][1])/Math.hypot(cachedPathPoints[pointIndex + 1][0] - cachedPathPoints[pointIndex][0], cachedPathPoints[pointIndex + 1][2] - cachedPathPoints[pointIndex][2])));
-	}
-	
-	private static float getPathLength(float[] startPoint, float[] endPoint, float[] cpStart, float[] cpEnd, float cpDist){
-		float dist1 = cpDist*2;
-		float dist2 = (float) Math.sqrt(Math.pow(cpStart[0] - startPoint[0], 2) + Math.pow(cpStart[1] - startPoint[1], 2) + Math.pow(cpStart[2] - startPoint[2], 2));
-		float dist3 = (float) Math.sqrt(Math.pow(cpEnd[0] - cpStart[0], 2) + Math.pow(cpEnd[1] - cpStart[1], 2) + Math.pow(cpEnd[2] - cpStart[2], 2))/2F;
-		float dist4 = (float) Math.sqrt(Math.pow(endPoint[0] - cpEnd[0], 2) + Math.pow(endPoint[1] - cpEnd[1], 2) + Math.pow(endPoint[2] - cpEnd[2], 2))/2F;
-		return (dist1 + dist2 + dist3 + dist4)/2;
-	}
-	
-	private static float[] getAxisCachedPathPoints(float startPoint, float endPoint, float cpStart, float cpEnd, float pathLength){
-		float[] points = new float[Math.round(pathLength*cachedCurveIncrement) + 1];
-		if(startPoint == endPoint){
-			for(int i=0; i<points.length; ++i){
-				points[i] = startPoint;
-			}
-		}else{
-			float t;
-			for(int i=0; i<points.length; ++i){
-				t = i/(points.length*1F);
-				points[i] = (float) (Math.pow(1-t, 3)*startPoint + 3*Math.pow(1-t, 2)*t*cpStart + 3*(1-t)*Math.pow(t, 2)*cpEnd + Math.pow(t, 3)*endPoint);
-			}
-		}
+
 		return points;
+	}
+
+	/**
+	 * Helper method to determine a path point's value on a given axis.
+	 */
+	private static final float getCachedPathPointVal(boolean skip, float startPoint, float cpStart, float cpEnd, float endPoint, float t) {
+		if (skip) {
+			return startPoint;
+		}
+
+		return (float) (pow(1-t, 3)*startPoint + 3*pow(1-t, 2)*t*cpStart + 3*(1-t)*pow(t, 2)*cpEnd + pow(t, 3)*endPoint);
+	}
+
+	/**
+	 * Returns the pitch rotation for the path point closest to the given position.
+	 */
+	public float getCachedPitchAngleAt(float segment){
+
+		int point = round(segment*pathLength*CACHED_CURVE_INCREMENTS);
+		if (point + 1 >= cachedPathPoints.length) {
+			point = cachedPathPoints.length - 2;
+		}
+
+		return (float) -toDegrees(atan(
+				(cachedPathPoints[point + 1].y - cachedPathPoints[point].y)
+				/
+				hypot(cachedPathPoints[point + 1].x - cachedPathPoints[point].x, cachedPathPoints[point + 1].z - cachedPathPoints[point].z)
+				));
+	}
+
+	/**
+	 * Returns the cached path point closest to the given position. 
+	 */
+	public Vec3f getCachedPointAt(float segment) {
+
+		return cachedPathPoints[ round(segment*pathLength*CACHED_CURVE_INCREMENTS) ];
+	}
+
+	/**
+	 * Returns the rotation about Y-axis for the path point closest to the given position.
+	 */
+	public float getCachedYawAngleAt(float segment) {
+
+		int point = round(segment*pathLength*CACHED_CURVE_INCREMENTS);
+		if (point + 1 >= cachedPathPoints.length) {
+			point = cachedPathPoints.length - 2;
+		}
+
+		return (float) (360 + toDegrees(atan2(
+				cachedPathPoints[point].x - cachedPathPoints[point + 1].x,
+				cachedPathPoints[point + 1].z - cachedPathPoints[point].z)
+				)) % 360;
+	}
+
+	/**
+	 * Returns the length of the curve path.
+	 */
+	private float getPathLength() {
+		return (float) (
+				(cpDist * 2.0D) +
+				(sqrt(cpStart.sqDistTo(startPoint))) +
+				(sqrt(cpEnd.sqDistTo(cpStart)) / 2.0D) +
+				(sqrt(endPoint.sqDistTo(cpEnd)) / 2.0D)
+				) / 2.0F;
 	}
 }

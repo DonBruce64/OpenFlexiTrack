@@ -23,6 +23,7 @@ import net.minecraft.world.World;
 import openflextrack.OFT;
 import openflextrack.OFTRegistry;
 import openflextrack.packets.ChatPacket;
+import openflextrack.util.BlockPosDim;
 
 /**
  * Survey flag block. Handles flag linkage.

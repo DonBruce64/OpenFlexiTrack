@@ -1,4 +1,4 @@
-package openflextrack.blocks;
+package openflextrack.util;
 
 import net.minecraft.util.math.BlockPos;
 

@@ -18,6 +18,7 @@ import openflextrack.OFT;
 import openflextrack.OFTCurve;
 import openflextrack.blocks.TileEntityTrackStructure;
 import openflextrack.rendering.blockmodels.ModelTrackTie;
+import openflextrack.util.Vec3f;
 
 @SideOnly(Side.CLIENT)
 public class RenderTrack extends TileEntitySpecialRenderer<TileEntityTrackStructure>{
@@ -143,7 +144,7 @@ public class RenderTrack extends TileEntitySpecialRenderer<TileEntityTrackStruct
 		final float offset = 0.65F;
 		float textureOffset = 0;
 		List<float[]> texPoints = new ArrayList<float[]>();
-		float[] currentPoint;
+		Vec3f currentPoint;
 		float currentAngle;
 
 		//First get information about what connectors need rendering.
@@ -205,39 +206,41 @@ public class RenderTrack extends TileEntitySpecialRenderer<TileEntityTrackStruct
 		if(renderStartRailExtra){
 			//Get the remainder of what rails have not been rendered and add that point.
 			float lastPointOnCurve = (trackConnectedToStartOtherEnd.curve.pathLength - (trackConnectedToStartOtherEnd.curve.pathLength%offset))/trackConnectedToStartOtherEnd.curve.pathLength;			
-			currentPoint = new float[3];
-			currentPoint[0] = trackConnectedToStartOtherEnd.curve.getCachedPointAt(lastPointOnCurve)[0] + trackConnectedToStartOtherEnd.getPos().getX() - startPos.getX();
-			currentPoint[1] = trackConnectedToStartOtherEnd.curve.getCachedPointAt(lastPointOnCurve)[1] + trackConnectedToStartOtherEnd.getPos().getY() - startPos.getY();
-			currentPoint[2] = trackConnectedToStartOtherEnd.curve.getCachedPointAt(lastPointOnCurve)[2] + trackConnectedToStartOtherEnd.getPos().getZ() - startPos.getZ();
+			currentPoint = new Vec3f(
+					trackConnectedToStartOtherEnd.curve.getCachedPointAt(lastPointOnCurve).x + trackConnectedToStartOtherEnd.getPos().getX() - startPos.getX(),
+					trackConnectedToStartOtherEnd.curve.getCachedPointAt(lastPointOnCurve).y + trackConnectedToStartOtherEnd.getPos().getY() - startPos.getY(),
+					trackConnectedToStartOtherEnd.curve.getCachedPointAt(lastPointOnCurve).z + trackConnectedToStartOtherEnd.getPos().getZ() - startPos.getZ()
+					);
 			currentAngle = trackConnectedToStartOtherEnd.curve.getCachedYawAngleAt(lastPointOnCurve);
-			textureOffset = (float) -(Math.hypot(currentPoint[0] - trackConnectedToStart.getPos().getX(), currentPoint[2] - trackConnectedToStart.getPos().getZ()) + Math.hypot(trackConnectedToStart.getPos().getX(), trackConnectedToStart.getPos().getZ()));
+			textureOffset = (float) -(Math.hypot(currentPoint.x - trackConnectedToStart.getPos().getX(), currentPoint.z - trackConnectedToStart.getPos().getZ()) + Math.hypot(trackConnectedToStart.getPos().getX(), trackConnectedToStart.getPos().getZ()));
 			texPoints.add(new float[]{
-					currentPoint[0],
-					currentPoint[1] + 0.1875F,
-					currentPoint[2],
+					currentPoint.x,
+					currentPoint.y + 0.1875F,
+					currentPoint.z,
 					(float) Math.sin(Math.toRadians(currentAngle)),
 					(float) Math.cos(Math.toRadians(currentAngle)),
 					(textureOffset),
-					world.getCombinedLight(new BlockPos((int) Math.ceil(currentPoint[0]), (int) Math.ceil(currentPoint[1]), (int) Math.ceil(currentPoint[2])).add(startPos), 0)
+					world.getCombinedLight(new BlockPos((int) Math.ceil(currentPoint.x), (int) Math.ceil(currentPoint.y), (int) Math.ceil(currentPoint.z)).add(startPos), 0)
 			});
 		}
 
 		//Get a start tie if needed.
 		if(renderStartTie || (renderStartRail && !renderStartRailExtra)){
-			currentPoint = new float[3];
-			currentPoint[0] =  trackConnectedToStart.getPos().getX() - startPos.getX() + 0.5F;
-			currentPoint[1] =  trackConnectedToStart.getPos().getY() - startPos.getY();
-			currentPoint[2] =  trackConnectedToStart.getPos().getZ() - startPos.getZ() + 0.5F;
+			currentPoint = new Vec3f(
+					trackConnectedToStart.getPos().getX() - startPos.getX() + 0.5F,
+					trackConnectedToStart.getPos().getY() - startPos.getY(),
+					trackConnectedToStart.getPos().getZ() - startPos.getZ() + 0.5F
+					);
 			currentAngle = (trackConnectedToStart.curve.getCachedYawAngleAt(0) +180)%360;
-			textureOffset = (float) -Math.hypot(currentPoint[0], currentPoint[2]);
+			textureOffset = (float) -Math.hypot(currentPoint.x, currentPoint.z);
 			texPoints.add(new float[]{
-					currentPoint[0],
-					currentPoint[1] + 0.1875F,
-					currentPoint[2],
+					currentPoint.x,
+					currentPoint.y + 0.1875F,
+					currentPoint.z,
 					(float) Math.sin(Math.toRadians(currentAngle)),
 					(float) Math.cos(Math.toRadians(currentAngle)),
 					(textureOffset),
-					world.getCombinedLight(new BlockPos((int) Math.ceil(currentPoint[0]), (int) Math.ceil(currentPoint[1]), (int) Math.ceil(currentPoint[2])).add(startPos), 0)
+					world.getCombinedLight(new BlockPos((int) Math.ceil(currentPoint.x), (int) Math.ceil(currentPoint.y), (int) Math.ceil(currentPoint.z)).add(startPos), 0)
 			});
 		}
 
@@ -246,37 +249,38 @@ public class RenderTrack extends TileEntitySpecialRenderer<TileEntityTrackStruct
 			currentPoint = curve.getCachedPointAt(f/curve.pathLength);
 			currentAngle = curve.getCachedYawAngleAt(f/curve.pathLength);
 			if(f != 0){
-				textureOffset += (float) Math.hypot(currentPoint[0] - texPoints.get(texPoints.size() - 1)[0], currentPoint[2] - texPoints.get(texPoints.size() - 1)[2]);
+				textureOffset += (float) Math.hypot(currentPoint.x - texPoints.get(texPoints.size() - 1)[0], currentPoint.z - texPoints.get(texPoints.size() - 1)[2]);
 			}else{
 				textureOffset = 0;
 			}
 			texPoints.add(new float[]{
-					currentPoint[0],
-					currentPoint[1] + 0.1875F,
-					currentPoint[2],
+					currentPoint.x,
+					currentPoint.y + 0.1875F,
+					currentPoint.z,
 					(float) Math.sin(Math.toRadians(currentAngle)),
 					(float) Math.cos(Math.toRadians(currentAngle)),
 					(textureOffset),
-					world.getCombinedLight(new BlockPos((int) Math.ceil(currentPoint[0]), (int) Math.ceil(currentPoint[1]), (int) Math.ceil(currentPoint[2])).add(startPos), 0)
+					world.getCombinedLight(new BlockPos((int) Math.ceil(currentPoint.x), (int) Math.ceil(currentPoint.y), (int) Math.ceil(currentPoint.z)).add(startPos), 0)
 			});
 		}
 
 		//Get an end tie if needed.
 		if(renderEndTie || (renderEndRail && !renderEndRailExtra)){
-			currentPoint = new float[3];
-			currentPoint[0] =  trackConnectedToEnd.getPos().getX() - startPos.getX() + 0.5F;
-			currentPoint[1] =  trackConnectedToEnd.getPos().getY() - startPos.getY();
-			currentPoint[2] =  trackConnectedToEnd.getPos().getZ() - startPos.getZ() + 0.5F;
+			currentPoint = new Vec3f(
+					trackConnectedToEnd.getPos().getX() - startPos.getX() + 0.5F,
+					trackConnectedToEnd.getPos().getY() - startPos.getY(),
+					trackConnectedToEnd.getPos().getZ() - startPos.getZ() + 0.5F
+					);
 			currentAngle = trackConnectedToEnd.curve.startAngle;
-			textureOffset += (float) Math.hypot(currentPoint[0] - texPoints.get(texPoints.size() - 1)[0], currentPoint[2] - texPoints.get(texPoints.size() - 1)[2]);
+			textureOffset += (float) Math.hypot(currentPoint.x - texPoints.get(texPoints.size() - 1)[0], currentPoint.z - texPoints.get(texPoints.size() - 1)[2]);
 			texPoints.add(new float[]{
-					currentPoint[0],
-					currentPoint[1] + 0.1875F,
-					currentPoint[2],
+					currentPoint.x,
+					currentPoint.y + 0.1875F,
+					currentPoint.z,
 					(float) Math.sin(Math.toRadians(currentAngle)),
 					(float) Math.cos(Math.toRadians(currentAngle)),
 					(textureOffset),
-					world.getCombinedLight(new BlockPos((int) Math.ceil(currentPoint[0]), (int) Math.ceil(currentPoint[1]), (int) Math.ceil(currentPoint[2])).add(startPos), 0)
+					world.getCombinedLight(new BlockPos((int) Math.ceil(currentPoint.x), (int) Math.ceil(currentPoint.y), (int) Math.ceil(currentPoint.z)).add(startPos), 0)
 			});			
 		}
 
@@ -284,21 +288,21 @@ public class RenderTrack extends TileEntitySpecialRenderer<TileEntityTrackStruct
 		if(renderEndRailExtra){
 			//Get the remainder of what rails have not been rendered and add that point.
 			float lastPointOnCurve = (trackConnectedToEndOtherEnd.curve.pathLength - (trackConnectedToEndOtherEnd.curve.pathLength%offset))/trackConnectedToEndOtherEnd.curve.pathLength;
-			currentPoint = new float[3];
-			currentPoint = new float[3];
-			currentPoint[0] = trackConnectedToEndOtherEnd.curve.getCachedPointAt(lastPointOnCurve)[0] + trackConnectedToEndOtherEnd.getPos().getX() - startPos.getX();
-			currentPoint[1] = trackConnectedToEndOtherEnd.curve.getCachedPointAt(lastPointOnCurve)[1] + trackConnectedToEndOtherEnd.getPos().getY() - startPos.getY();
-			currentPoint[2] = trackConnectedToEndOtherEnd.curve.getCachedPointAt(lastPointOnCurve)[2] + trackConnectedToEndOtherEnd.getPos().getZ() - startPos.getZ();
+			currentPoint = new Vec3f(
+					trackConnectedToEndOtherEnd.curve.getCachedPointAt(lastPointOnCurve).x + trackConnectedToEndOtherEnd.getPos().getX() - startPos.getX(),
+					trackConnectedToEndOtherEnd.curve.getCachedPointAt(lastPointOnCurve).y + trackConnectedToEndOtherEnd.getPos().getY() - startPos.getY(),
+					trackConnectedToEndOtherEnd.curve.getCachedPointAt(lastPointOnCurve).z + trackConnectedToEndOtherEnd.getPos().getZ() - startPos.getZ()
+					);
 			currentAngle = (trackConnectedToEndOtherEnd.curve.getCachedYawAngleAt(lastPointOnCurve) + 180)%360;
-			textureOffset += (float) Math.hypot(currentPoint[0] - texPoints.get(texPoints.size() - 1)[0], currentPoint[2] - texPoints.get(texPoints.size() - 1)[2]);
+			textureOffset += (float) Math.hypot(currentPoint.x - texPoints.get(texPoints.size() - 1)[0], currentPoint.z - texPoints.get(texPoints.size() - 1)[2]);
 			texPoints.add(new float[]{
-					currentPoint[0],
-					currentPoint[1] + 0.1875F,
-					currentPoint[2],
+					currentPoint.x,
+					currentPoint.y + 0.1875F,
+					currentPoint.z,
 					(float) Math.sin(Math.toRadians(currentAngle)),
 					(float) Math.cos(Math.toRadians(currentAngle)),
 					(textureOffset),
-					world.getCombinedLight(new BlockPos((int) Math.ceil(currentPoint[0]), (int) Math.ceil(currentPoint[1]), (int) Math.ceil(currentPoint[2])).add(startPos), 0)
+					world.getCombinedLight(new BlockPos((int) Math.ceil(currentPoint.x), (int) Math.ceil(currentPoint.y), (int) Math.ceil(currentPoint.z)).add(startPos), 0)
 			});
 		}
 

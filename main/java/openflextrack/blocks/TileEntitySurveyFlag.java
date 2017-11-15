@@ -16,6 +16,7 @@ import openflextrack.OFT;
 import openflextrack.OFTCurve;
 import openflextrack.OFTRegistry;
 import openflextrack.packets.TileEntitySyncPacket;
+import openflextrack.util.Vec3f;
 
 /**
  * Survey flag tile entity. Handles flag linkage and dispatches synchronisation packets to clients if needed.
@@ -43,7 +44,7 @@ public class TileEntitySurveyFlag extends TileEntityRotatable {
 	 */
 	private BlockPos addFakeTracksToMap(OFTCurve curve, BlockPos curvePos, Map<BlockPos, Byte> blockMap) {
 
-		float[] currentPoint;
+		Vec3f currentPoint;
 		float currentAngle;
 		float currentSin;
 		float currentCos;
@@ -56,10 +57,10 @@ public class TileEntitySurveyFlag extends TileEntityRotatable {
 			//Offset the current point slightly to account for the height of the ties.
 			//We don't want to judge fake block height by the bottom of the ties,
 			//rather we need to judge from the middle of them.
-			currentPoint[1] += 1/16F;
+			currentPoint.y += 1/16F;
 
 			for(byte j=-1; j<=1; ++j){
-				BlockPos placementPos = new BlockPos(Math.round(currentPoint[0] - 0.5 + j*currentCos), currentPoint[1], Math.round(currentPoint[2] - 0.5 + j*currentSin)).add(curvePos);
+				BlockPos placementPos = new BlockPos(Math.round(currentPoint.x - 0.5 + j*currentCos), currentPoint.y, Math.round(currentPoint.z - 0.5 + j*currentSin)).add(curvePos);
 				if(!worldObj.getBlockState(placementPos).getBlock().canPlaceBlockAt(worldObj, placementPos)){
 					if(!(curvePos.equals(placementPos) || curvePos.add(curve.endPos).equals(placementPos))){
 						return placementPos;
@@ -71,11 +72,11 @@ public class TileEntitySurveyFlag extends TileEntityRotatable {
 					break;
 				}
 				if(!isBlockInList){
-					if(currentPoint[1] >= 0){						
-						blockMap.put(placementPos, (byte) (currentPoint[1]%1*16F));
+					if(currentPoint.y >= 0){						
+						blockMap.put(placementPos, (byte) (currentPoint.y % 1*16F));
 					}else{
 						//Going from top-down on a slope.  Invert Y.
-						blockMap.put(placementPos, (byte) (16 + currentPoint[1]%1*16F));
+						blockMap.put(placementPos, (byte) (16 + currentPoint.y % 1*16F));
 					}
 					//Double-check to see if there's a block already in the list below this one.
 					//If so, we're on a slope and that block needs a height of 16.
