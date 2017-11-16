@@ -7,7 +7,6 @@ import static java.lang.Math.hypot;
 import static java.lang.Math.pow;
 import static java.lang.Math.round;
 import static java.lang.Math.sin;
-import static java.lang.Math.sqrt;
 import static java.lang.Math.toDegrees;
 import static java.lang.Math.toRadians;
 
@@ -38,15 +37,15 @@ public class OFTCurve {
 	/** End point's block coordinates. */
 	public final BlockPos endPos;
 
-	/**  */
-	private final float cpDist;//TODO JavaDoc for fields with "cp" prefix.
+	/** Distance between curve points {@link #startPoint} and {@link #endPoint} divided by {@code 3.0D}. */
+	private final float cpDist;
 	/** Local start point coordinates. */
 	private final Vec3f startPoint;
 	/** Local end point coordinates. */
 	private final Vec3f endPoint;
-	/**  */
+	/** Bezier curve's start point. */
 	private final Vec3f cpStart;
-	/**  */
+	/** Bezier curve's end point. */
 	private final Vec3f cpEnd;
 
 	/** Array holding cached points on the curve path. */
@@ -69,7 +68,7 @@ public class OFTCurve {
 		this.endPos = ep;
 		this.startPoint = new Vec3f(0.5F, 0, 0.5F);
 		this.endPoint = new Vec3f(ep.getX() + 0.5F, ep.getY(), ep.getZ() + 0.5F);
-		this.cpDist = (float) (sqrt(endPoint.sqDistTo(startPoint)) / 3.0D);
+		this.cpDist = (float) (endPoint.distTo(startPoint) / 3.0D);
 
 		this.cpStart = new Vec3f(
 				(float) (startPoint.x - sin(toRadians(startAngle))*cpDist),
@@ -169,9 +168,9 @@ public class OFTCurve {
 	private float getPathLength() {
 		return (float) (
 				(cpDist * 2.0D) +
-				(sqrt(cpStart.sqDistTo(startPoint))) +
-				(sqrt(cpEnd.sqDistTo(cpStart)) / 2.0D) +
-				(sqrt(endPoint.sqDistTo(cpEnd)) / 2.0D)
+				(cpStart.distTo(startPoint)) +
+				(cpEnd.distTo(cpStart) / 2.0D) +
+				(endPoint.distTo(cpEnd) / 2.0D)
 				) / 2.0F;
 	}
 }

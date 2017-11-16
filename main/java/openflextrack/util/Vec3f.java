@@ -33,12 +33,12 @@ public class Vec3f {
 	 * 
 	 * @param vec - The vector that will be subtracted from this vector.
 	 */
-	public double sqDistTo(Vec3f vec) {
+	public double distTo(Vec3f vec) {
 		
 		float x = this.x - vec.x;
 		float y = this.y - vec.y;
 		float z = this.z - vec.z;
 		
-		return (x*x) + (y*y) + (z*z);
+		return Math.sqrt( (x*x) + (y*y) + (z*z) );
 	}
 }
