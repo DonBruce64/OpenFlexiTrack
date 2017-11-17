@@ -244,26 +244,26 @@ public class TileEntitySurveyFlag extends TileEntityRotatable {
 		/*
 		 * Finally create fake tracks.
 		 */
-		BlockTrackStructureFake.toggleMainTrackBreakage(false);
+		BlockTrackFake.toggleMainTrackBreakage(false);
 		{
 			/* Set block states at selected positions. */
 			IBlockState defState = OFTRegistry.trackStructureFake.getDefaultState();
 
 			for (BlockPos placementPos : blockMap.keySet()) {
-				worldObj.setBlockState(placementPos, defState.withProperty(BlockTrackStructureFake.height, (int) blockMap.get(placementPos)));			
+				worldObj.setBlockState(placementPos, defState.withProperty(BlockTrackFake.height, (int) blockMap.get(placementPos)));			
 			}
 
 			/* Set block states and tile entities at start and end. */
 			worldObj.setBlockState(this.pos, OFTRegistry.trackStructure.getDefaultState());
 			worldObj.setBlockState(this.pos.add(thisFlagCurve.endPos), OFTRegistry.trackStructure.getDefaultState());
-			TileEntityTrackStructure startTile = new TileEntityTrackStructure(thisFlagCurve);
-			TileEntityTrackStructure endTile = new TileEntityTrackStructure(otherFlagCurve);
+			TileEntityTrack startTile = new TileEntityTrack(thisFlagCurve);
+			TileEntityTrack endTile = new TileEntityTrack(otherFlagCurve);
 			startTile.setFakeTracks(new ArrayList<BlockPos>(blockMap.keySet()));
 			endTile.setFakeTracks(new ArrayList<BlockPos>(blockMap.keySet()));
 			worldObj.setTileEntity(this.pos, startTile);
 			worldObj.setTileEntity(this.pos.add(thisFlagCurve.endPos), endTile);
 		}
-		BlockTrackStructureFake.toggleMainTrackBreakage(true);
+		BlockTrackFake.toggleMainTrackBreakage(true);
 
 		return null;
 	}

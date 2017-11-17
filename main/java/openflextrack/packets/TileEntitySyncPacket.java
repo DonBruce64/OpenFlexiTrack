@@ -12,6 +12,9 @@ import net.minecraftforge.fml.common.network.simpleimpl.IMessageHandler;
 import net.minecraftforge.fml.common.network.simpleimpl.MessageContext;
 import openflextrack.OFT;
 
+/**
+ * Packet sent by the server to synchronise Tile Entity data to the client.
+ */
 public class TileEntitySyncPacket implements IMessage{
 	private int x;
 	private int y;
@@ -19,14 +22,14 @@ public class TileEntitySyncPacket implements IMessage{
 	private NBTTagCompound tag = new NBTTagCompound();
 
 	public TileEntitySyncPacket() {}
-	
+
 	public TileEntitySyncPacket(TileEntity tile){
 		this.x = tile.getPos().getX();
 		this.y = tile.getPos().getY();
 		this.z = tile.getPos().getZ();
 		tile.writeToNBT(tag);
 	}
-	
+
 	@Override
 	public void fromBytes(ByteBuf buf){
 		this.x=buf.readInt();

@@ -9,19 +9,22 @@ import net.minecraftforge.fml.common.network.simpleimpl.IMessageHandler;
 import net.minecraftforge.fml.common.network.simpleimpl.MessageContext;
 import openflextrack.OFT;
 
-public class TileEntityClientRequestDataPacket implements IMessage{
+/**
+ * Data packet sent by clients to request a {@link openflextrack.packets.TileEntitySyncPacket synchronisation packet}.
+ */
+public class TileEntityClientReqPacket implements IMessage {
 	private int x;
 	private int y;
 	private int z;
 
-	public TileEntityClientRequestDataPacket() {}
-	
-	public TileEntityClientRequestDataPacket(TileEntity tile){
+	public TileEntityClientReqPacket() {}
+
+	public TileEntityClientReqPacket(TileEntity tile){
 		this.x = tile.getPos().getX();
 		this.y = tile.getPos().getY();
 		this.z = tile.getPos().getZ();
 	}
-	
+
 	@Override
 	public void fromBytes(ByteBuf buf){
 		this.x=buf.readInt();
@@ -36,9 +39,9 @@ public class TileEntityClientRequestDataPacket implements IMessage{
 		buf.writeInt(this.z);
 	}
 
-	public static class Handler implements IMessageHandler<TileEntityClientRequestDataPacket, IMessage> {
+	public static class Handler implements IMessageHandler<TileEntityClientReqPacket, IMessage> {
 		@Override
-		public IMessage onMessage(final TileEntityClientRequestDataPacket message, final MessageContext ctx){
+		public IMessage onMessage(final TileEntityClientReqPacket message, final MessageContext ctx){
 			FMLCommonHandler.instance().getWorldThread(ctx.netHandler).addScheduledTask(new Runnable(){
 				@Override
 				public void run(){

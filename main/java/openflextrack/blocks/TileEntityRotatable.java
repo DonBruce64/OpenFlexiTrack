@@ -3,7 +3,7 @@ package openflextrack.blocks;
 import net.minecraft.nbt.NBTTagCompound;
 import net.minecraft.tileentity.TileEntity;
 import openflextrack.OFT;
-import openflextrack.packets.TileEntityClientRequestDataPacket;
+import openflextrack.packets.TileEntityClientReqPacket;
 
 public abstract class TileEntityRotatable extends TileEntity {
 
@@ -14,7 +14,7 @@ public abstract class TileEntityRotatable extends TileEntity {
 	public void validate(){
 		super.validate();
 		if(worldObj.isRemote){
-			OFT.OFTNet.sendToServer(new TileEntityClientRequestDataPacket(this));
+			OFT.OFTNet.sendToServer(new TileEntityClientReqPacket(this));
 		}
 	}
 

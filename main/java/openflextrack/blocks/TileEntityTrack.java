@@ -3,6 +3,8 @@ package openflextrack.blocks;
 import java.util.ArrayList;
 import java.util.List;
 
+import javax.annotation.Nullable;
+
 import net.minecraft.nbt.NBTTagCompound;
 import net.minecraft.nbt.NBTTagList;
 import net.minecraft.util.math.AxisAlignedBB;
@@ -16,26 +18,26 @@ import openflextrack.OFTCurve;
  * 
  * @author don_bruce
  */
-public class TileEntityTrackStructure extends TileEntityRotatable {
+public class TileEntityTrack extends TileEntityRotatable {
 
 	/** {@code true} after this track has tried to connect to another track segment. */
 	@SideOnly(Side.CLIENT) public boolean hasTriedToConnectToOtherSegment;
 
 	/** The track this track is connected to. */
-	@SideOnly(Side.CLIENT) public TileEntityTrackStructure connectedTrack;
+	@SideOnly(Side.CLIENT) public TileEntityTrack connectedTrack;
 
 	/** The {@link openflextrack.OFTCurve curve} of this track. May be {@code null}. */
-	public OFTCurve curve;
+	@Nullable public OFTCurve curve;
 
 	/** A {@link java.util.List List} holding all fake tracks' {@link net.minecraft.util.math.BlockPos block positions}. */
 	private List<BlockPos> fakeTracks = new ArrayList<BlockPos>();
 
 
-	public TileEntityTrackStructure() {
+	public TileEntityTrack() {
 		super();
 	}
 
-	public TileEntityTrackStructure(OFTCurve curve) {
+	public TileEntityTrack(OFTCurve curve) {
 		this.curve = curve;
 	}
 
@@ -49,12 +51,12 @@ public class TileEntityTrackStructure extends TileEntityRotatable {
 
 	@Override
 	@SideOnly(Side.CLIENT)
-	public double getMaxRenderDistanceSquared(){
+	public double getMaxRenderDistanceSquared() {
 		return 65536.0D;
 	}
 
 	@Override
-	public AxisAlignedBB getRenderBoundingBox(){
+	public AxisAlignedBB getRenderBoundingBox() {//FIXME If neither start nor end point of a long track are in the view, the track may only render its ballast. 
 		return INFINITE_EXTENT_AABB;
 	}
 
@@ -89,13 +91,13 @@ public class TileEntityTrackStructure extends TileEntityRotatable {
 
 		this.invalidate();
 
-		BlockTrackStructureFake.toggleMainTrackBreakage(false);
+		BlockTrackFake.toggleMainTrackBreakage(false);
 		{
 			for (BlockPos fakePos : fakeTracks) {
 				worldObj.setBlockToAir(fakePos);
 			}
 		}
-		BlockTrackStructureFake.toggleMainTrackBreakage(true);
+		BlockTrackFake.toggleMainTrackBreakage(true);
 	}
 
 	/**

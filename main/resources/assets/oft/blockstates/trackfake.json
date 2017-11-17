@@ -1,0 +1,21 @@
+{
+    "variants": {
+        "height=0": { "model": "oft:trackfake00" },
+        "height=1": { "model": "oft:trackfake01" },
+        "height=2": { "model": "oft:trackfake02" },
+        "height=3": { "model": "oft:trackfake03" },
+        "height=4": { "model": "oft:trackfake04" },
+        "height=5": { "model": "oft:trackfake05" },
+        "height=6": { "model": "oft:trackfake06" },
+        "height=7": { "model": "oft:trackfake07" },
+        "height=8": { "model": "oft:trackfake08" },
+        "height=9": { "model": "oft:trackfake09" },
+        "height=10": { "model": "oft:trackfake10" },
+        "height=11": { "model": "oft:trackfake11" },
+        "height=12": { "model": "oft:trackfake12" },
+        "height=13": { "model": "oft:trackfake13" },
+        "height=14": { "model": "oft:trackfake14" },
+        "height=15": { "model": "oft:trackfake15" }
+    }
+
+}

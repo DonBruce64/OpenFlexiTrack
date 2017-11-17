@@ -21,7 +21,7 @@ import net.minecraft.world.IBlockAccess;
 import net.minecraft.world.World;
 import openflextrack.OFTRegistry;
 
-public class BlockTrackStructureFake extends Block {
+public class BlockTrackFake extends Block {
 
 	/** Height property of this block, used with {@link net.minecraft.block.state.IBlockState block states}. */
 	public static final PropertyInteger height = PropertyInteger.create("height", 0, 15);
@@ -36,7 +36,7 @@ public class BlockTrackStructureFake extends Block {
 	private static BlockPos firstBrokenBlockPos;
 
 
-	public BlockTrackStructureFake(){
+	public BlockTrackFake(){
 		super(Material.IRON);
 		this.setHardness(5.0F);
 		this.setResistance(10.0F);
@@ -113,12 +113,12 @@ public class BlockTrackStructureFake extends Block {
 					continue;
 				}
 
-				if (world.getTileEntity(testingPos.offset(searchOffset)) instanceof TileEntityTrackStructure) {
+				if (world.getTileEntity(testingPos.offset(searchOffset)) instanceof TileEntityTrack) {
 
 					/* Found a track TE. See if it's the parent for this fake track block. */
 					TileEntity tile = world.getTileEntity(testingPos.offset(searchOffset));
-					if (tile instanceof TileEntityTrackStructure &&
-							((TileEntityTrackStructure) tile).getFakeTracks().contains(thisPos)) {
+					if (tile instanceof TileEntityTrack &&
+							((TileEntityTrack) tile).getFakeTracks().contains(thisPos)) {
 
 						return testingPos.offset(searchOffset);
 					}

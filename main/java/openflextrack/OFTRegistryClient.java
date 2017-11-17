@@ -8,7 +8,7 @@ import net.minecraftforge.fml.client.registry.ClientRegistry;
 import net.minecraftforge.fml.relauncher.Side;
 import net.minecraftforge.fml.relauncher.SideOnly;
 import openflextrack.blocks.TileEntitySurveyFlag;
-import openflextrack.blocks.TileEntityTrackStructure;
+import openflextrack.blocks.TileEntityTrack;
 import openflextrack.rendering.blockrenders.RenderSurveyFlag;
 import openflextrack.rendering.blockrenders.RenderTrack;
 
@@ -26,7 +26,7 @@ public class OFTRegistryClient {
 	 */
 	public static void preInit(){
 		ClientRegistry.bindTileEntitySpecialRenderer(TileEntitySurveyFlag.class, new RenderSurveyFlag());
-		ClientRegistry.bindTileEntitySpecialRenderer(TileEntityTrackStructure.class, new RenderTrack());
+		ClientRegistry.bindTileEntitySpecialRenderer(TileEntityTrack.class, new RenderTrack());
 	}
 
 	/**

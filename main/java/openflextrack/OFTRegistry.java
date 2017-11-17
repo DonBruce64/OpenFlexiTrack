@@ -8,10 +8,10 @@ import net.minecraft.tileentity.TileEntity;
 import net.minecraftforge.fml.common.registry.GameRegistry;
 import net.minecraftforge.fml.relauncher.Side;
 import openflextrack.blocks.BlockSurveyFlag;
-import openflextrack.blocks.BlockTrackStructure;
-import openflextrack.blocks.BlockTrackStructureFake;
+import openflextrack.blocks.BlockTrack;
+import openflextrack.blocks.BlockTrackFake;
 import openflextrack.packets.ChatPacket;
-import openflextrack.packets.TileEntityClientRequestDataPacket;
+import openflextrack.packets.TileEntityClientReqPacket;
 import openflextrack.packets.TileEntitySyncPacket;
 
 /**
@@ -41,8 +41,8 @@ public class OFTRegistry {
 	/*
 	 * Block fields.
 	 */
-	public static final Block trackStructure = new BlockTrackStructure();
-	public static final Block trackStructureFake = new BlockTrackStructureFake();
+	public static final Block trackStructure = new BlockTrack();
+	public static final Block trackStructureFake = new BlockTrackFake();
 	public static final Block surveyFlag = new BlockSurveyFlag();
 
 	/**
@@ -59,7 +59,7 @@ public class OFTRegistry {
 
 		int packetNumber = 0;
 		OFT.OFTNet.registerMessage(ChatPacket.Handler.class, ChatPacket.class, ++packetNumber, Side.CLIENT);
-		OFT.OFTNet.registerMessage(TileEntityClientRequestDataPacket.Handler.class, TileEntityClientRequestDataPacket.class, ++packetNumber, Side.SERVER);
+		OFT.OFTNet.registerMessage(TileEntityClientReqPacket.Handler.class, TileEntityClientReqPacket.class, ++packetNumber, Side.SERVER);
 		OFT.OFTNet.registerMessage(TileEntitySyncPacket.Handler.class, TileEntitySyncPacket.class, ++packetNumber, Side.CLIENT);
 		OFT.OFTNet.registerMessage(TileEntitySyncPacket.Handler.class, TileEntitySyncPacket.class, ++packetNumber, Side.SERVER);
 	}

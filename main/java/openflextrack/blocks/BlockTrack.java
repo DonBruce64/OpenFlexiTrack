@@ -14,13 +14,13 @@ import net.minecraft.world.IBlockAccess;
 import net.minecraft.world.World;
 import openflextrack.OFTRegistry;
 
-public class BlockTrackStructure extends BlockRotateable {
+public class BlockTrack extends BlockRotateable {
 
 	/** Default block collision box. */
 	private static final AxisAlignedBB blockBox = new AxisAlignedBB(0.0F, 0.0F, 0.0F, 1.0F, 0.125F, 1.0F);
 
 
-	public BlockTrackStructure(){
+	public BlockTrack(){
 		super(Material.IRON);
 		this.setHardness(5.0F);
 		this.setResistance(10.0F);
@@ -37,13 +37,13 @@ public class BlockTrackStructure extends BlockRotateable {
 		if (!world.isRemote) {
 
 			TileEntity tile = world.getTileEntity(pos);
-			if (tile instanceof TileEntityTrackStructure) {
+			if (tile instanceof TileEntityTrack) {
 
-				TileEntityTrackStructure track = (TileEntityTrackStructure) tile;
+				TileEntityTrack track = (TileEntityTrack) tile;
 				if (track.curve != null) {
 
 					tile = world.getTileEntity(pos.add(track.curve.endPos));
-					if (tile instanceof TileEntityTrackStructure) {
+					if (tile instanceof TileEntityTrack) {
 
 						/* Compute number of items depending on track length. */
 						int numberTracks = MathHelper.ceiling_float_int(track.curve.pathLength);
@@ -55,7 +55,7 @@ public class BlockTrackStructure extends BlockRotateable {
 							EntityItem entityItem;
 
 							// Instantiate EntityItem depending on last (fake) position.
-							BlockPos lastFake = BlockTrackStructureFake.getLastHitFakeTrack();
+							BlockPos lastFake = BlockTrackFake.getLastHitFakeTrack();
 							if (lastFake != null) {
 								entityItem = new EntityItem(world, lastFake.getX(), lastFake.getY(), lastFake.getZ(), itemStack);
 							}
@@ -71,7 +71,7 @@ public class BlockTrackStructure extends BlockRotateable {
 						/* Remove other track tile. */
 						track.removeFakeTracks();
 						super.breakBlock(world, pos, state);
-						world.setBlockToAir(((TileEntityTrackStructure) tile).getPos());
+						world.setBlockToAir(((TileEntityTrack) tile).getPos());
 						return;
 					}
 
@@ -84,7 +84,7 @@ public class BlockTrackStructure extends BlockRotateable {
 
 	@Override
 	public TileEntity createNewTileEntity(World worldIn, int meta){
-		return new TileEntityTrackStructure();
+		return new TileEntityTrack();
 	}
 
 	@Override
