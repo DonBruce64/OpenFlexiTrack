@@ -11,7 +11,7 @@ import net.minecraft.util.math.AxisAlignedBB;
 import net.minecraft.util.math.BlockPos;
 import net.minecraftforge.fml.relauncher.Side;
 import net.minecraftforge.fml.relauncher.SideOnly;
-import openflextrack.api.track.OFTCurve;
+import openflextrack.OFTCurve;
 
 /**
  * Track block tile entity. Handles fake child blocks.
@@ -26,7 +26,7 @@ public class TileEntityTrack extends TileEntityRotatable {
 	/** The track this track is connected to. */
 	@SideOnly(Side.CLIENT) public TileEntityTrack connectedTrack;
 
-	/** The {@link openflextrack.api.track.OFTCurve curve} of this track. May be {@code null}. */
+	/** The {@link openflextrack.OFTCurve curve} of this track. May be {@code null}. */
 	@Nullable public OFTCurve curve;
 
 	/** A {@link java.util.List List} holding all fake tracks' {@link net.minecraft.util.math.BlockPos block positions}. */

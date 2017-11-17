@@ -95,7 +95,7 @@ public class BlockTrack extends BlockRotateable {
 
 	@Override
 	public ItemStack getPickBlock(IBlockState state, RayTraceResult target, World world, BlockPos pos, EntityPlayer player){
-		//TODO Add track sub-types here as properties and return meta for item damage.
+		//TODO COMPAT - Add track sub-types here as properties and return meta for item damage.
 		return new ItemStack(OFTRegistry.track);
 	}
 }

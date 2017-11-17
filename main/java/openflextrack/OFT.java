@@ -57,8 +57,8 @@ public class OFT {
 	 * @param meta - The {@link net.minecraftforge.fml.common.ModMetadata mod's metadata} reference to populate.
 	 */
 	private static void initModMetadata(ModMetadata meta) {
-		//TODO MODMETA - I've heard reports of this crashing Linux machines. Should probably put it into a mcmeta file or whatever it's supposed to go into.
-		//TODO MODMETA - Verify whether merely modifying the mod metadata is causing trouble, or whether there is something peculiar that is causing known issue.
+		//TODO @don_bruce MODMETA - I've heard reports of this crashing Linux machines. Should probably put it into a mcmeta file or whatever it's supposed to go into.
+		//TODO @don_bruce MODMETA - Verify whether merely modifying the mod metadata is causing trouble, or whether there is something peculiar that is causing known issue.
 		meta.name = MODNAME;
 		meta.modId = MODID;
 		meta.version = MODVER;

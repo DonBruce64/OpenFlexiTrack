@@ -13,8 +13,8 @@ import net.minecraft.util.math.BlockPos;
 import net.minecraftforge.fml.relauncher.Side;
 import net.minecraftforge.fml.relauncher.SideOnly;
 import openflextrack.OFT;
+import openflextrack.OFTCurve;
 import openflextrack.OFTRegistry;
-import openflextrack.api.track.OFTCurve;
 import openflextrack.packets.TileEntitySyncPacket;
 import openflextrack.util.Vec3f;
 
@@ -37,7 +37,7 @@ public class TileEntitySurveyFlag extends TileEntityRotatable {
 	/**
 	 * Adds to the given map all fake tracks on the given curve.
 	 * 
-	 * @param curve - The linked {@link openflextrack.api.track.OFTCurve curve}.
+	 * @param curve - The linked {@link openflextrack.OFTCurve curve}.
 	 * @param curvePos - The {@link net.minecraft.util.math.BlockPos BlockPos} the curve starts at.
 	 * @param blockMap - A map containing all block positions occupied by the linked track.
 	 * @return {@code null} if successful, otherwise the BlockPos of the first obstructing block.
