@@ -15,7 +15,7 @@ import net.minecraft.world.World;
 import net.minecraftforge.fml.relauncher.Side;
 import net.minecraftforge.fml.relauncher.SideOnly;
 import openflextrack.OFT;
-import openflextrack.OFTCurve;
+import openflextrack.api.track.OFTCurve;
 import openflextrack.blocks.TileEntityTrack;
 import openflextrack.rendering.blockmodels.ModelTrackTie;
 import openflextrack.util.Vec3f;
@@ -41,9 +41,6 @@ public class RenderTrack extends TileEntitySpecialRenderer<TileEntityTrack> {
 	private static final float upperOuterX = 15F/16F;
 	private static final float upperLowerY = 3F/16F;
 	private static final float upperUpperY = 4F/16F;
-
-	/** Default distance between two ties. */
-	private static final float tieOffset = 0.65F;
 
 
 	public RenderTrack() {
@@ -87,6 +84,7 @@ public class RenderTrack extends TileEntitySpecialRenderer<TileEntityTrack> {
 							 */
 							if (!track.equals(tileTrack.connectedTrack)) {
 								track.connectedTrack = tileTrack;
+								tileTrack.connectedTrack = track;
 							}
 
 							return true;
@@ -327,7 +325,7 @@ public class RenderTrack extends TileEntitySpecialRenderer<TileEntityTrack> {
 	 */
 	private static void drawTie(float brightness, boolean holographic) {
 
-		if(!holographic){
+		if (!holographic) {
 			OpenGlHelper.setLightmapTextureCoords(OpenGlHelper.lightmapTexUnit, brightness%65536, brightness/65536);
 		}
 
@@ -384,6 +382,14 @@ public class RenderTrack extends TileEntitySpecialRenderer<TileEntityTrack> {
 
 		/* Quick check to see if connection is still valid. */
 		if (tileTrack.connectedTrack != null && tileTrack.connectedTrack.isInvalid()) {
+
+			// Reset the other track as well, if existent.
+			if (tileTrack.connectedTrack.connectedTrack == tileTrack) {
+				tileTrack.connectedTrack.connectedTrack = null;
+				tileTrack.connectedTrack.hasTriedToConnectToOtherSegment = false;
+			}
+
+			// Then reset this track.
 			tileTrack.connectedTrack = null;
 			tileTrack.hasTriedToConnectToOtherSegment = false;
 		}
@@ -442,13 +448,18 @@ public class RenderTrack extends TileEntitySpecialRenderer<TileEntityTrack> {
 	 * 
 	 * @param world - {@link net.minecraft.world.World World} object.
 	 * @param pos - Starting {@link net.minecraft.util.math.BlockPos position} for the curve.
-	 * @param curve - The {@link openflextrack.OFTCurve curve} to render.
+	 * @param curve - The {@link openflextrack.api.track.OFTCurve curve} to render.
 	 * @param holographic - {@code true} if the segment is holographic.
 	 * @param connectedStart - The {@link openflextrack.blocks.TileEntityTrack track} connected to the start of the rendered track.
 	 * @param connectedEnd - The track connected to the end of the rendered track.
 	 */
 	public static void renderTrackSegmentFromCurve(World world, BlockPos pos, OFTCurve curve, boolean holographic,
 			TileEntityTrack connectedStart, TileEntityTrack connectedEnd) {
+
+		/*
+		 * Initialise custom data.
+		 */
+		final float tieOffset = 0.65F;
 
 		/* 
 		 * First get information about what connectors need rendering.

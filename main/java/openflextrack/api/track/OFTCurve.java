@@ -1,4 +1,4 @@
-package openflextrack;
+package openflextrack.api.track;
 
 import static java.lang.Math.atan;
 import static java.lang.Math.atan2;
