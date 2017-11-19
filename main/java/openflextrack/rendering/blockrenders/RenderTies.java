@@ -6,13 +6,13 @@ import org.lwjgl.opengl.GL11;
 
 import net.minecraft.client.Minecraft;
 import net.minecraft.client.renderer.OpenGlHelper;
-import openflextrack.OFTCurve;
 import openflextrack.api.ISleeperType;
+import openflextrack.api.OFTCurve;
 import openflextrack.blocks.TileEntityTrack;
 
 /**
  * Helper class to handle tie rendering in
- * {@link openflextrack.rendering.blockrenders.RenderTrack#renderTrackSegmentFromCurve(net.minecraft.world.World, net.minecraft.util.math.BlockPos, openflextrack.OFTCurve, boolean, openflextrack.blocks.TileEntityTrack, openflextrack.blocks.TileEntityTrack) renderTrackSegmentFromCurve()}.
+ * {@link openflextrack.rendering.blockrenders.RenderTrack#renderTrackFromCurve(net.minecraft.world.World, net.minecraft.util.math.BlockPos, openflextrack.api.OFTCurve, boolean, openflextrack.blocks.TileEntityTrack, openflextrack.blocks.TileEntityTrack) renderTrackSegmentFromCurve()}.
  */
 public class RenderTies {
 
@@ -47,7 +47,7 @@ public class RenderTies {
 	 * @param startIndex - First index to start iterating through the given points from.
 	 * @param offsetIndex - Upper limit of the point iteration, used as {@code texPoints.size() - offsetIndex}.
 	 * @param connectedEnd - The {@link openflextrack.blocks.TileEntityTrack track} connected to the curve's end. May be {@code null}.
-	 * @param curve - The {@link openflextrack.OFTCurve curve} that is rendered.
+	 * @param curve - The {@link openflextrack.api.OFTCurve curve} that is rendered.
 	 */
 	public static void render(ISleeperType sleeperType, ArrayList<float[]> texPoints, boolean holographic, boolean renderStartTie, boolean renderEndTie,
 			byte startIndex, byte offsetIndex, TileEntityTrack connectedEnd, OFTCurve curve) {

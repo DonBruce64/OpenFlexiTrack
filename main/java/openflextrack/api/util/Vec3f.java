@@ -1,4 +1,4 @@
-package openflextrack.util;
+package openflextrack.api.util;
 
 /**
  * Three-dimensional vector holding 32-bit floating point coordinates.

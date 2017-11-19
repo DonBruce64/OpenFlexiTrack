@@ -11,7 +11,7 @@ import openflextrack.api.IRailType;
 
 /**
  * Helper class to handle rail rendering in
- * {@link openflextrack.rendering.blockrenders.RenderTrack#renderTrackSegmentFromCurve(net.minecraft.world.World, net.minecraft.util.math.BlockPos, openflextrack.OFTCurve, boolean, openflextrack.blocks.TileEntityTrack, openflextrack.blocks.TileEntityTrack) renderTrackSegmentFromCurve()}.
+ * {@link openflextrack.rendering.blockrenders.RenderTrack#renderTrackFromCurve(net.minecraft.world.World, net.minecraft.util.math.BlockPos, openflextrack.OFTCurve, boolean, openflextrack.blocks.TileEntityTrack, openflextrack.blocks.TileEntityTrack) renderTrackSegmentFromCurve()}.
  */
 public class RenderRails {
 

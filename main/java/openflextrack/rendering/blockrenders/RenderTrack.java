@@ -2,6 +2,8 @@ package openflextrack.rendering.blockrenders;
 
 import java.util.ArrayList;
 
+import javax.annotation.Nullable;
+
 import org.lwjgl.opengl.GL11;
 
 import net.minecraft.client.Minecraft;
@@ -14,12 +16,12 @@ import net.minecraft.world.World;
 import net.minecraftforge.fml.relauncher.Side;
 import net.minecraftforge.fml.relauncher.SideOnly;
 import openflextrack.OFT;
-import openflextrack.OFTCurve;
 import openflextrack.api.ISleeperType;
+import openflextrack.api.ITrackContainer;
+import openflextrack.api.OFTCurve;
+import openflextrack.api.util.Vec3f;
 import openflextrack.blocks.DefaultRailType;
-import openflextrack.blocks.DefaultSleeperType;
 import openflextrack.blocks.TileEntityTrack;
-import openflextrack.util.Vec3f;
 
 @SideOnly(Side.CLIENT)
 public class RenderTrack extends TileEntitySpecialRenderer<TileEntityTrack> {
@@ -255,7 +257,7 @@ public class RenderTrack extends TileEntitySpecialRenderer<TileEntityTrack> {
 			/* Render the finished track, including track beds and rails. */
 			GL11.glPushMatrix();
 			{
-				renderTrackSegmentFromCurve(tileTrack.getWorld(), tileTrack.getPos(), tileTrack.curve, false, tileTrack.connectedTrack, otherEnd.connectedTrack);
+				renderTrackFromCurve(tileTrack, tileTrack.connectedTrack, otherEnd.connectedTrack);
 			}
 			GL11.glPopMatrix();
 
@@ -283,21 +285,26 @@ public class RenderTrack extends TileEntitySpecialRenderer<TileEntityTrack> {
 	 * <br>
 	 * This method may be called from anywhere, not just from within the track's TESR.
 	 * 
-	 * @param world - {@link net.minecraft.world.World World} object.
-	 * @param pos - Starting {@link net.minecraft.util.math.BlockPos position} for the curve.
-	 * @param curve - The {@link openflextrack.OFTCurve curve} to render.
-	 * @param holographic - {@code true} if the segment is holographic.
-	 * @param connectedStart - The {@link openflextrack.blocks.TileEntityTrack track} connected to the start of the rendered track.
-	 * @param connectedEnd - The track connected to the end of the rendered track.
+	 * @param trackContainer - The {@link openflextrack.api.ITrackContainer track} to render.
+	 * @param connectedStart - The {@link openflextrack.blocks.TileEntityTrack track} connected to the start of the rendered track. May be {@code null}.
+	 * @param connectedEnd - The track connected to the end of the rendered track. May be {@code null}.
 	 */
-	public static void renderTrackSegmentFromCurve(World world, BlockPos pos, OFTCurve curve, boolean holographic,
-			TileEntityTrack connectedStart, TileEntityTrack connectedEnd) {
+	public static void renderTrackFromCurve(ITrackContainer trackContainer, @Nullable TileEntityTrack connectedStart, @Nullable TileEntityTrack connectedEnd) {
+
+		/* Don't render if there's no curve. */
+		OFTCurve curve = trackContainer.getCurve();
+		if (curve == null) {
+			return;
+		}
 
 		/*
-		 * Initialise custom data.
+		 * Read track container data.
 		 */
-		ISleeperType sleeperType = DefaultSleeperType.DEFAULT_SLEEPER_TYPE;
+		World world = trackContainer.getWorld();
+		BlockPos pos = trackContainer.getBlockPos();
+		ISleeperType sleeperType = trackContainer.getSleeperType();
 		final float tieOffset = sleeperType.getOffset();
+		final boolean holographic = trackContainer.isHolographic();
 
 		/* 
 		 * First get information about what connectors need rendering.

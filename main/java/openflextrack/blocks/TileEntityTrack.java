@@ -11,14 +11,17 @@ import net.minecraft.util.math.AxisAlignedBB;
 import net.minecraft.util.math.BlockPos;
 import net.minecraftforge.fml.relauncher.Side;
 import net.minecraftforge.fml.relauncher.SideOnly;
-import openflextrack.OFTCurve;
+import openflextrack.api.IRailType;
+import openflextrack.api.ISleeperType;
+import openflextrack.api.ITrackContainer;
+import openflextrack.api.OFTCurve;
 
 /**
  * Track block tile entity. Handles fake child blocks.
  * 
  * @author don_bruce
  */
-public class TileEntityTrack extends TileEntityRotatable {
+public class TileEntityTrack extends TileEntityRotatable implements ITrackContainer {
 
 	/** {@code true} after this track has tried to connect to another track segment. */
 	@SideOnly(Side.CLIENT) public boolean hasTriedToConnectToOtherSegment;
@@ -26,11 +29,11 @@ public class TileEntityTrack extends TileEntityRotatable {
 	/** The track this track is connected to. */
 	@SideOnly(Side.CLIENT) public TileEntityTrack connectedTrack;
 
-	/** The {@link openflextrack.OFTCurve curve} of this track. May be {@code null}. */
+	/** The {@link openflextrack.api.OFTCurve curve} of this track. May be {@code null}. */
 	@Nullable public OFTCurve curve;
 
 	/** A {@link java.util.List List} holding all fake tracks' {@link net.minecraft.util.math.BlockPos block positions}. */
-	private List<BlockPos> fakeTracks = new ArrayList<BlockPos>();
+	private final List<BlockPos> fakeTracks = new ArrayList<BlockPos>();
 
 
 	public TileEntityTrack() {
@@ -41,6 +44,16 @@ public class TileEntityTrack extends TileEntityRotatable {
 		this.curve = curve;
 	}
 
+
+	@Override
+	public BlockPos getBlockPos() {
+		return this.pos;
+	}
+
+	@Override
+	public OFTCurve getCurve() {
+		return this.curve;
+	}
 
 	/**
 	 * Getter for {@link #fakeTracks}.
@@ -56,8 +69,23 @@ public class TileEntityTrack extends TileEntityRotatable {
 	}
 
 	@Override
-	public AxisAlignedBB getRenderBoundingBox() {//FIXME If neither start nor end point of a long track are in the view, the track may only render its ballast. 
+	public IRailType getRailType() {
+		return DefaultRailType.DEFAULT_RAIL_TYPE;
+	}
+
+	@Override
+	public AxisAlignedBB getRenderBoundingBox() {
 		return INFINITE_EXTENT_AABB;
+	}
+
+	@Override
+	public ISleeperType getSleeperType() {
+		return DefaultSleeperType.DEFAULT_SLEEPER_TYPE;
+	}
+
+	@Override
+	public boolean isHolographic() {
+		return false;
 	}
 
 	@Override
@@ -79,7 +107,7 @@ public class TileEntityTrack extends TileEntityRotatable {
 
 		for (int i = 0; i < tagCount; ++i) {
 			nbt0 = tagList.getCompoundTagAt(i);
-			fakeTracks.add(new BlockPos(nbt0.getInteger("x"), nbt0.getInteger("y"), nbt0.getInteger("z")));
+			this.fakeTracks.add(new BlockPos(nbt0.getInteger("x"), nbt0.getInteger("y"), nbt0.getInteger("z")));
 		}
 	}
 
@@ -101,10 +129,11 @@ public class TileEntityTrack extends TileEntityRotatable {
 	}
 
 	/**
-	 * Set {@link #fakeTracks} to the given list of take track blocks.
+	 * Clears {@link #fakeTracks} and sets its contents to the objects in the given list.
 	 */
 	public void setFakeTracks(List<BlockPos> fakeTracks){
-		this.fakeTracks = fakeTracks;
+		this.fakeTracks.clear();
+		this.fakeTracks.addAll(fakeTracks);
 	}
 
 	@Override

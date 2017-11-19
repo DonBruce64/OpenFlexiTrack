@@ -1,4 +1,4 @@
-package openflextrack;
+package openflextrack.api;
 
 import static java.lang.Math.atan;
 import static java.lang.Math.atan2;
@@ -11,7 +11,7 @@ import static java.lang.Math.toDegrees;
 import static java.lang.Math.toRadians;
 
 import net.minecraft.util.math.BlockPos;
-import openflextrack.util.Vec3f;
+import openflextrack.api.util.Vec3f;
 
 /**
  * Curve class used for track paths.<br>
@@ -54,7 +54,7 @@ public class OFTCurve {
 
 	/**
 	 * Initialise a new curve ending at the given position with given start and end angles (in degrees).<br>
-	 * Assumes start position to be origin (see {@link openflextrack.OFTCurve OFTCurve}), and an angle of {@code 0°} to point to the north.
+	 * Assumes start position to be origin (see {@link openflextrack.api.OFTCurve OFTCurve}), and an angle of {@code 0°} to point to the north.
 	 * 
 	 * @param ep - {@link net.minecraft.util.math.BlockPos End position}.
 	 * @param sa - Start angle, in degrees.
@@ -87,7 +87,7 @@ public class OFTCurve {
 
 
 	/**
-	 * Called to populate the given array of {@link openflextrack.util.Vec3f path points} with this curve's data.
+	 * Called to populate the given array of {@link openflextrack.api.util.Vec3f path points} with this curve's data.
 	 * 
 	 * @return The populated array.
 	 */

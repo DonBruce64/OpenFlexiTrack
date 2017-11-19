@@ -13,17 +13,20 @@ import net.minecraft.util.math.BlockPos;
 import net.minecraftforge.fml.relauncher.Side;
 import net.minecraftforge.fml.relauncher.SideOnly;
 import openflextrack.OFT;
-import openflextrack.OFTCurve;
 import openflextrack.OFTRegistry;
+import openflextrack.api.IRailType;
+import openflextrack.api.ISleeperType;
+import openflextrack.api.ITrackContainer;
+import openflextrack.api.OFTCurve;
+import openflextrack.api.util.Vec3f;
 import openflextrack.packets.TileEntitySyncPacket;
-import openflextrack.util.Vec3f;
 
 /**
  * Survey flag tile entity. Handles flag linkage and dispatches synchronisation packets to clients if needed.
  * 
  * @author don_bruce
  */
-public class TileEntitySurveyFlag extends TileEntityRotatable {
+public class TileEntitySurveyFlag extends TileEntityRotatable implements ITrackContainer {
 
 	/** Path between this flag and the link. May be {@code null}. */
 	public OFTCurve linkedCurve;
@@ -37,12 +40,15 @@ public class TileEntitySurveyFlag extends TileEntityRotatable {
 	/**
 	 * Adds to the given map all fake tracks on the given curve.
 	 * 
-	 * @param curve - The linked {@link openflextrack.OFTCurve curve}.
+	 * @param curve - The linked {@link openflextrack.api.OFTCurve curve}.
 	 * @param curvePos - The {@link net.minecraft.util.math.BlockPos BlockPos} the curve starts at.
 	 * @param blockMap - A map containing all block positions occupied by the linked track.
 	 * @return {@code null} if successful, otherwise the BlockPos of the first obstructing block.
 	 */
 	private BlockPos addFakeTracksToMap(OFTCurve curve, BlockPos curvePos, Map<BlockPos, Byte> blockMap) {
+
+		/* Number of ballast blocks to each side, excluding the center ballast block. */
+		final byte ballast = 1;
 
 		Vec3f currentPoint;
 		float currentAngle;
@@ -59,30 +65,34 @@ public class TileEntitySurveyFlag extends TileEntityRotatable {
 			//rather we need to judge from the middle of them.
 			currentPoint.y += 1/16F;
 
-			for(byte j=-1; j<=1; ++j){
+			for (byte j = -(ballast+1); j <= ballast+1; ++j) {
 				BlockPos placementPos = new BlockPos(Math.round(currentPoint.x - 0.5 + j*currentCos), currentPoint.y, Math.round(currentPoint.z - 0.5 + j*currentSin)).add(curvePos);
+
+				if (placementPos.distanceSqToCenter(currentPoint.x+curvePos.getX(), currentPoint.y+curvePos.getY(), currentPoint.z+curvePos.getZ()) > Math.pow(ballast+1.0D, 2)){
+					continue;
+				}
+
 				if(!worldObj.getBlockState(placementPos).getBlock().canPlaceBlockAt(worldObj, placementPos)){
 					if(!(curvePos.equals(placementPos) || curvePos.add(curve.endPos).equals(placementPos))){
 						return placementPos;
 					}
 				}
-				boolean isBlockInList = false;
+
 				if(blockMap.containsKey(placementPos)){
-					isBlockInList = true;
-					break;
+					continue;
 				}
-				if(!isBlockInList){
-					if(currentPoint.y >= 0){						
-						blockMap.put(placementPos, (byte) (currentPoint.y % 1*16F));
-					}else{
-						//Going from top-down on a slope.  Invert Y.
-						blockMap.put(placementPos, (byte) (16 + currentPoint.y % 1*16F));
-					}
-					//Double-check to see if there's a block already in the list below this one.
-					//If so, we're on a slope and that block needs a height of 16.
-					if(blockMap.containsKey(placementPos.down())){
-						blockMap.put(placementPos.down(), (byte) 15);
-					}
+
+				if(currentPoint.y >= 0){
+					blockMap.put(placementPos, (byte) (currentPoint.y % 1*16F));
+				}else{
+					//Going from top-down on a slope.  Invert Y.
+					blockMap.put(placementPos, (byte) (16 + currentPoint.y % 1*16F));
+				}
+
+				//Double-check to see if there's a block already in the list below this one.
+				//If so, we're on a slope and that block needs a height of 16.
+				if(blockMap.containsKey(placementPos.down())){
+					blockMap.put(placementPos.down(), (byte) 15);
 				}
 			}
 
@@ -157,14 +167,39 @@ public class TileEntitySurveyFlag extends TileEntityRotatable {
 	}
 
 	@Override
+	public BlockPos getBlockPos() {
+		return this.pos;
+	}
+
+	@Override
+	public OFTCurve getCurve() {
+		return this.linkedCurve;
+	}
+
+	@Override
 	@SideOnly(Side.CLIENT)
 	public double getMaxRenderDistanceSquared(){
 		return 65536.0D;
 	}
 
 	@Override
+	public IRailType getRailType() {
+		return DefaultRailType.DEFAULT_RAIL_TYPE;
+	}
+
+	@Override
 	public AxisAlignedBB getRenderBoundingBox(){
 		return INFINITE_EXTENT_AABB;
+	}
+
+	@Override
+	public ISleeperType getSleeperType() {
+		return DefaultSleeperType.DEFAULT_SLEEPER_TYPE;
+	}
+
+	@Override
+	public boolean isHolographic() {
+		return true;
 	}
 
 	/**
@@ -232,7 +267,7 @@ public class TileEntitySurveyFlag extends TileEntityRotatable {
 		 * On the other hand, if we went from the other direction we might miss ballast below the track.
 		 * Steep hills tend to do this, so go in both directions just in case.
 		 */
-		BlockPos blockingBlock = addFakeTracksToMap(thisFlagCurve, this.pos, blockMap);
+		BlockPos blockingBlock = addFakeTracksToMap(thisFlagCurve, this.pos, blockMap);//TODO COMPAT - Custom rail bed width can be implemented here and a few lines below.
 		if(blockingBlock != null){
 			return blockingBlock;
 		}

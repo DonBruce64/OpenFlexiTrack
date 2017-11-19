@@ -22,8 +22,8 @@ import net.minecraft.world.IBlockAccess;
 import net.minecraft.world.World;
 import openflextrack.OFT;
 import openflextrack.OFTRegistry;
+import openflextrack.api.util.BlockPosDim;
 import openflextrack.packets.ChatPacket;
-import openflextrack.util.BlockPosDim;
 
 /**
  * Survey flag block. Handles flag linkage.
@@ -133,7 +133,7 @@ public class BlockSurveyFlag extends BlockRotateable {
 			/* If the player doesn't have enough items, notify the player and don't do anything. */
 			final int trackLength = MathHelper.ceiling_float_int(tileFlag.linkedCurve.pathLength);
 			if (!player.capabilities.isCreativeMode) {
-				if (getItemsPlayerHas(player.inventory, OFTRegistry.track, -1) < trackLength) {//TODO The item metadata in this method call (and a few lines below) could be a hook for other mods to use.
+				if (getItemsPlayerHas(player.inventory, OFTRegistry.track, -1) < trackLength) {//TODO COMPAT - The item metadata in this method call (and a few lines below) could be a hook for other mods to use.
 					OFT.OFTNet.sendTo(new ChatPacket("interact.flag.failure.materials", " " + String.valueOf(trackLength)), (EntityPlayerMP) player);
 					return;
 				}
