@@ -12,6 +12,14 @@ import net.minecraftforge.fml.relauncher.SideOnly;
 public interface ISleeperType {
 	
 	/**
+	 * Return the width of sleepers (in meters).<br>
+	 * <br>
+	 * <i>Sleepers will render half the width to either side;
+	 * a sleeper whose width is {@code 1.0F} will render half a meter to each side.</i>
+	 */
+	float getDefaultWidth();
+	
+	/**
 	 * Return the distance between sleepers (in meters).<br>
 	 * <br>
 	 * <i>Offset is also directly related to rail smoothness;
@@ -24,14 +32,6 @@ public interface ISleeperType {
 	 */
 	@SideOnly(Side.CLIENT)
 	ResourceLocation getTexture();
-	
-	/**
-	 * Return the width of sleepers (in meters).<br>
-	 * <br>
-	 * <i>Sleepers will render half the width to either side;
-	 * a sleeper whose width is {@code 1.0F} will render half a meter to each side.</i>
-	 */
-	float getWidth();
 	
 	/**
 	 * Render a single sleeper with given width.

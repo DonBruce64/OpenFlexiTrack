@@ -40,6 +40,11 @@ public class DefaultSleeperType implements ISleeperType {
 
 
 	@Override
+	public float getDefaultWidth() {
+		return 2.75F;
+	}
+
+	@Override
 	public float getOffset() {
 		return 0.65F;
 	}
@@ -51,11 +56,6 @@ public class DefaultSleeperType implements ISleeperType {
 			tieTexture = new ResourceLocation(OFT.MODID, "textures/blockmodels/tie.png");
 		}
 		return tieTexture;
-	}
-
-	@Override
-	public float getWidth() {
-		return 2.75F;
 	}
 
 	@Override

@@ -259,7 +259,7 @@ public class TileEntitySurveyFlag extends TileEntityRotatable implements ITrackC
 			return tile.getPos();
 		}
 
-		float width = getSleeperType().getWidth() - 1.0F;
+		float width = getSleeperType().getDefaultWidth() - 1.0F;
 		if (width <= 0.0F) {
 			width = 0.0F;
 		}

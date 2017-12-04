@@ -303,7 +303,7 @@ public class RenderTrack extends TileEntitySpecialRenderer<TileEntityTrack> {
 		BlockPos pos = trackContainer.getBlockPos();
 		ISleeperType sleeperType = trackContainer.getSleeperType();
 		final float tieOffset = sleeperType.getOffset();
-		final float tieWidth = sleeperType.getWidth();
+		final float tieWidth = sleeperType.getDefaultWidth();
 		final boolean holographic = trackContainer.isHolographic();
 
 		/* 
