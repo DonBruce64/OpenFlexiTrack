@@ -10,6 +10,7 @@ import net.minecraft.nbt.NBTTagCompound;
 import net.minecraft.tileentity.TileEntity;
 import net.minecraft.util.math.AxisAlignedBB;
 import net.minecraft.util.math.BlockPos;
+import net.minecraft.util.math.MathHelper;
 import net.minecraftforge.fml.relauncher.Side;
 import net.minecraftforge.fml.relauncher.SideOnly;
 import openflextrack.OFT;
@@ -43,19 +44,17 @@ public class TileEntitySurveyFlag extends TileEntityRotatable implements ITrackC
 	 * @param curve - The linked {@link openflextrack.api.OFTCurve curve}.
 	 * @param curvePos - The {@link net.minecraft.util.math.BlockPos BlockPos} the curve starts at.
 	 * @param blockMap - A map containing all block positions occupied by the linked track.
+	 * @param ballast - Number of ballast blocks to each side, excluding the center ballast block.
 	 * @return {@code null} if successful, otherwise the BlockPos of the first obstructing block.
 	 */
-	private BlockPos addFakeTracksToMap(OFTCurve curve, BlockPos curvePos, Map<BlockPos, Byte> blockMap) {
-
-		/* Number of ballast blocks to each side, excluding the center ballast block. */
-		final byte ballast = 1;
+	private BlockPos addFakeTracksToMap(OFTCurve curve, BlockPos curvePos, Map<BlockPos, Byte> blockMap, final int ballast) {
 
 		Vec3f currentPoint;
 		float currentAngle;
 		float currentSin;
 		float currentCos;
 
-		for(float f=0; f <= curve.pathLength; f = Math.min(f + 0.05F, curve.pathLength)){
+		for(float f=0; f <= curve.pathLength; f = Math.min(f + 0.05F, curve.pathLength)){//FIXME @ZnDevelopment - Railbeds may be at slightly incorrect height under certain circumstances.
 			currentPoint = curve.getCachedPointAt(f/curve.pathLength);
 			currentAngle = curve.getCachedYawAngleAt(f/curve.pathLength);
 			currentSin = (float) Math.sin(Math.toRadians(currentAngle));
@@ -65,7 +64,7 @@ public class TileEntitySurveyFlag extends TileEntityRotatable implements ITrackC
 			//rather we need to judge from the middle of them.
 			currentPoint.y += 1/16F;
 
-			for (byte j = -(ballast+1); j <= ballast+1; ++j) {
+			for (int j = -(ballast+1); j <= ballast+1; ++j) {
 				BlockPos placementPos = new BlockPos(Math.round(currentPoint.x - 0.5 + j*currentCos), currentPoint.y, Math.round(currentPoint.z - 0.5 + j*currentSin)).add(curvePos);
 
 				if (placementPos.distanceSqToCenter(currentPoint.x+curvePos.getX(), currentPoint.y+curvePos.getY(), currentPoint.z+curvePos.getZ()) > Math.pow(ballast+1.0D, 2)){
@@ -236,7 +235,10 @@ public class TileEntitySurveyFlag extends TileEntityRotatable implements ITrackC
 
 		int[] linkedFlagCoords = nbt.getIntArray("linkedFlagCoords");
 		if(linkedFlagCoords.length != 0){
-			linkedCurve = new OFTCurve(new BlockPos(linkedFlagCoords[0], linkedFlagCoords[1], linkedFlagCoords[2]).subtract(this.pos), this.rotation*45, nbt.getFloat("linkedFlagAngle"));
+			linkedCurve = new OFTCurve(
+					new BlockPos(linkedFlagCoords[0], linkedFlagCoords[1], linkedFlagCoords[2]).subtract(this.pos),
+					this.rotation*45,
+					nbt.getFloat("linkedFlagAngle"));
 		}else{
 			linkedCurve = null;
 		}
@@ -257,6 +259,12 @@ public class TileEntitySurveyFlag extends TileEntityRotatable implements ITrackC
 			return tile.getPos();
 		}
 
+		float width = getSleeperType().getWidth() - 1.0F;
+		if (width <= 0.0F) {
+			width = 0.0F;
+		}
+
+		final int ballast = MathHelper.ceiling_float_int( width / 2.0F );
 		final OFTCurve thisFlagCurve = linkedCurve;
 		final OFTCurve otherFlagCurve = ((TileEntitySurveyFlag) tile).linkedCurve;
 		final Map<BlockPos, Byte> blockMap = new HashMap<BlockPos, Byte>();
@@ -267,11 +275,11 @@ public class TileEntitySurveyFlag extends TileEntityRotatable implements ITrackC
 		 * On the other hand, if we went from the other direction we might miss ballast below the track.
 		 * Steep hills tend to do this, so go in both directions just in case.
 		 */
-		BlockPos blockingBlock = addFakeTracksToMap(thisFlagCurve, this.pos, blockMap);//TODO COMPAT - Custom rail bed width can be implemented here and a few lines below.
+		BlockPos blockingBlock = addFakeTracksToMap(thisFlagCurve, this.pos, blockMap, ballast);
 		if(blockingBlock != null){
 			return blockingBlock;
 		}
-		blockingBlock = addFakeTracksToMap(otherFlagCurve, this.pos.add(linkedCurve.endPos), blockMap);
+		blockingBlock = addFakeTracksToMap(otherFlagCurve, this.pos.add(linkedCurve.endPos), blockMap, ballast);
 		if(blockingBlock != null){
 			return blockingBlock;
 		}

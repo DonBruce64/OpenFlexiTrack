@@ -20,7 +20,6 @@ import openflextrack.api.ISleeperType;
 import openflextrack.api.ITrackContainer;
 import openflextrack.api.OFTCurve;
 import openflextrack.api.util.Vec3f;
-import openflextrack.blocks.DefaultRailType;
 import openflextrack.blocks.TileEntityTrack;
 
 @SideOnly(Side.CLIENT)
@@ -304,6 +303,7 @@ public class RenderTrack extends TileEntitySpecialRenderer<TileEntityTrack> {
 		BlockPos pos = trackContainer.getBlockPos();
 		ISleeperType sleeperType = trackContainer.getSleeperType();
 		final float tieOffset = sleeperType.getOffset();
+		final float tieWidth = sleeperType.getWidth();
 		final boolean holographic = trackContainer.isHolographic();
 
 		/* 
@@ -446,7 +446,7 @@ public class RenderTrack extends TileEntitySpecialRenderer<TileEntityTrack> {
 								(int) Math.ceil(currPoint.y),
 								(int) Math.ceil(currPoint.z)
 								).add(pos), 0),
-						2.75F//TODO this needs to reference ISleeperType stuff and NOT be static.
+						tieWidth
 				});
 			}
 
@@ -474,7 +474,7 @@ public class RenderTrack extends TileEntitySpecialRenderer<TileEntityTrack> {
 								(int) Math.ceil(currPoint.y),
 								(int) Math.ceil(currPoint.z)
 								).add(pos), 0),
-						2.75F
+						tieWidth
 				});
 			}
 		}
@@ -510,7 +510,7 @@ public class RenderTrack extends TileEntitySpecialRenderer<TileEntityTrack> {
 							(int) Math.ceil(currPoint.y),
 							(int) Math.ceil(currPoint.z)
 							).add(pos), 0),
-					2.75F
+					tieWidth
 			});
 		}
 
@@ -547,7 +547,7 @@ public class RenderTrack extends TileEntitySpecialRenderer<TileEntityTrack> {
 								(int) Math.ceil(currPoint.y),
 								(int) Math.ceil(currPoint.z)
 								).add(pos), 0),
-						2.75F
+						tieWidth
 				});			
 			}
 		}
@@ -591,7 +591,7 @@ public class RenderTrack extends TileEntitySpecialRenderer<TileEntityTrack> {
 								(int) Math.ceil(currPoint.y),
 								(int) Math.ceil(currPoint.z)
 								).add(pos), 0),
-						2.75F
+						tieWidth
 				});
 			}
 		}
@@ -620,7 +620,7 @@ public class RenderTrack extends TileEntitySpecialRenderer<TileEntityTrack> {
 
 		/* Render rails. */
 		RenderRails.render(
-				DefaultRailType.DEFAULT_RAIL_TYPE,//TODO COMPAT - Retrieve rail AND sleeper type from either:  associated curve OR associated track.
+				trackContainer.getRailType(),
 				texPoints,
 				holographic,
 				renderStartRail,

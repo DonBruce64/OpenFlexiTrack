@@ -10,6 +10,7 @@ import static java.lang.Math.sin;
 import static java.lang.Math.toDegrees;
 import static java.lang.Math.toRadians;
 
+import net.minecraft.nbt.NBTTagCompound;
 import net.minecraft.util.math.BlockPos;
 import openflextrack.api.util.Vec3f;
 
@@ -172,5 +173,34 @@ public class OFTCurve {
 				(cpEnd.distTo(cpStart) / 2.0D) +
 				(endPoint.distTo(cpEnd) / 2.0D)
 				) / 2.0F;
+	}
+
+	/**
+	 * Tries to read a new curve from the given {@link net.minecraft.nbt.NBTTagCompoundt nbt tag}.
+	 * 
+	 * @return The read {@openflextrack.api.OFTCurve curve}, or {@code null} if unsuccessful.
+	 */
+	public static OFTCurve readFromNBT(NBTTagCompound nbt) {
+
+		if (nbt.hasKey("curveEndPoint")) {
+
+			int[] endCoords = nbt.getIntArray("curveEndPoint");
+			if (endCoords.length != 0) {
+				return new OFTCurve(
+						new BlockPos(endCoords[0], endCoords[1], endCoords[2]),
+						nbt.getFloat("curveStartAngle"),
+						nbt.getFloat("curveEndAngle"));
+			}
+		}
+		return null;
+	}
+
+	/**
+	 * Writes this curve to the given {@link net.minecraft.nbt.NBTTagCompoundt nbt tag}.
+	 */
+	public void writeToNBT(NBTTagCompound nbt) {
+		nbt.setFloat("curveStartAngle", this.startAngle);
+		nbt.setFloat("curveEndAngle", this.endAngle);
+		nbt.setIntArray("curveEndPoint", new int[]{this.endPos.getX(), this.endPos.getY(), this.endPos.getZ()});
 	}
 }

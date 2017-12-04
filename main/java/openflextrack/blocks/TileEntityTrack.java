@@ -94,9 +94,9 @@ public class TileEntityTrack extends TileEntityRotatable implements ITrackContai
 		super.readFromNBT(nbt);
 
 		/* Read curve data. */
-		int[] endCoords = nbt.getIntArray("curveEndPoint");
-		if (endCoords.length != 0) {
-			curve = new OFTCurve(new BlockPos(endCoords[0], endCoords[1], endCoords[2]), nbt.getFloat("curveStartAngle"), nbt.getFloat("curveEndAngle"));
+		OFTCurve curve = OFTCurve.readFromNBT(nbt);
+		if (curve != null) {
+			this.curve = curve;
 		}
 
 		/* Read fake track positions. */
@@ -142,10 +142,8 @@ public class TileEntityTrack extends TileEntityRotatable implements ITrackContai
 		super.writeToNBT(nbt);
 
 		/* Write curve if existent, or invalidate tile entity. */
-		if (curve != null) {
-			nbt.setFloat("curveStartAngle", curve.startAngle);
-			nbt.setFloat("curveEndAngle", curve.endAngle);
-			nbt.setIntArray("curveEndPoint", new int[]{curve.endPos.getX(), curve.endPos.getY(), curve.endPos.getZ()});
+		if (this.curve != null) {
+			this.curve.writeToNBT(nbt);
 		} else {
 			this.invalidate();
 		}
