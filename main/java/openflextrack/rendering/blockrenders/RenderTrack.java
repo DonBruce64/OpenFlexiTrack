@@ -446,7 +446,7 @@ public class RenderTrack extends TileEntitySpecialRenderer<TileEntityTrack> {
 								(int) Math.ceil(currPoint.y),
 								(int) Math.ceil(currPoint.z)
 								).add(pos), 0),
-						1.5F
+						2.75F//TODO this needs to reference ISleeperType stuff and NOT be static.
 				});
 			}
 
@@ -474,7 +474,7 @@ public class RenderTrack extends TileEntitySpecialRenderer<TileEntityTrack> {
 								(int) Math.ceil(currPoint.y),
 								(int) Math.ceil(currPoint.z)
 								).add(pos), 0),
-						1.5F
+						2.75F
 				});
 			}
 		}
@@ -510,7 +510,7 @@ public class RenderTrack extends TileEntitySpecialRenderer<TileEntityTrack> {
 							(int) Math.ceil(currPoint.y),
 							(int) Math.ceil(currPoint.z)
 							).add(pos), 0),
-					1.5F
+					2.75F
 			});
 		}
 
@@ -547,7 +547,7 @@ public class RenderTrack extends TileEntitySpecialRenderer<TileEntityTrack> {
 								(int) Math.ceil(currPoint.y),
 								(int) Math.ceil(currPoint.z)
 								).add(pos), 0),
-						1.5F
+						2.75F
 				});			
 			}
 		}
@@ -591,7 +591,7 @@ public class RenderTrack extends TileEntitySpecialRenderer<TileEntityTrack> {
 								(int) Math.ceil(currPoint.y),
 								(int) Math.ceil(currPoint.z)
 								).add(pos), 0),
-						1.5F
+						2.75F
 				});
 			}
 		}

@@ -31,7 +31,6 @@ public class RenderTies {
 		}
 
 		Minecraft.getMinecraft().getTextureManager().bindTexture(sleeperType.getTexture());
-		GL11.glRotatef(180, 1, 0, 0);
 		GL11.glTranslatef(0, 0, -0.1875F);
 		sleeperType.render(width);
 	}
