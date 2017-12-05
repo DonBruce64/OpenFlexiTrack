@@ -24,6 +24,8 @@ import openflextrack.blocks.TileEntityTrack;
 
 @SideOnly(Side.CLIENT)
 public class RenderTrack extends TileEntitySpecialRenderer<TileEntityTrack> {
+	
+	//FIXME @ZnDevelopment PERFORMANCE - Benchmark rendering and eliminate possible bottlenecks. The new implementation takes a toll on FPS. Baaaad.
 
 	private static final ResourceLocation ballastTexture = new ResourceLocation(OFT.MODID, "textures/blocks/ballast.png");
 

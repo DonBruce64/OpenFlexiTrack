@@ -7,8 +7,11 @@ package openflextrack.api.util;
  */
 public class Vec3f {
 
+	/** Vector X coordinate */
 	public float x;
+	/** Vector Y coordinate */
 	public float y;
+	/** Vector Z coordinate */
 	public float z;
 
 	/**
