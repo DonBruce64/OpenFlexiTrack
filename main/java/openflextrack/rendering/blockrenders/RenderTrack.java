@@ -24,7 +24,7 @@ import openflextrack.blocks.TileEntityTrack;
 
 @SideOnly(Side.CLIENT)
 public class RenderTrack extends TileEntitySpecialRenderer<TileEntityTrack> {
-	
+
 	//FIXME @ZnDevelopment PERFORMANCE - Benchmark rendering and eliminate possible bottlenecks. The new implementation takes a toll on FPS. Baaaad.
 
 	private static final ResourceLocation ballastTexture = new ResourceLocation(OFT.MODID, "textures/blocks/ballast.png");
@@ -185,7 +185,8 @@ public class RenderTrack extends TileEntitySpecialRenderer<TileEntityTrack> {
 	 * @see #isTrackPrimary(TileEntityTrack, TileEntityTrack) isTrackPrimary()
 	 */
 	private static boolean isPositionPrimary(BlockPos pos1, BlockPos pos2){
-		return pos1.getX() != pos2.getX() ? pos1.getX() > pos2.getX() : pos1.getZ() > pos2.getZ();
+		return pos1.hashCode() > pos2.hashCode();//XXX
+		//return pos1.getX() != pos2.getX() ? pos1.getX() > pos2.getX() : pos1.getZ() > pos2.getZ();
 	}
 
 	/**
@@ -326,7 +327,7 @@ public class RenderTrack extends TileEntitySpecialRenderer<TileEntityTrack> {
 
 		if (connectedStart != null && connectedStart.curve != null) {
 
-			if (isPositionPrimary( connectedStart.getPos(), pos.add(curve.endPos) )) {
+			if (isPositionPrimary( connectedStart.getPos(), pos )) {
 
 				/* Connector is the primary for this track and needs to render. */
 				TileEntity tile = world.getTileEntity(connectedStart.getPos().add(connectedStart.curve.endPos));
@@ -414,31 +415,21 @@ public class RenderTrack extends TileEntitySpecialRenderer<TileEntityTrack> {
 
 				/* Get the remainder of what rails have not been rendered and add that point. */
 				OFTCurve curveSOE = connectedStartOtherEnd.curve;
-				float lastPointOnCurve = (curveSOE.pathLength - (curveSOE.pathLength%tieOffset))  /  curveSOE.pathLength;
-
-				Vec3f lastPointSOE = curveSOE.getCachedPointAt(lastPointOnCurve);
+				float lastPointSOECurve = (curveSOE.pathLength - (curveSOE.pathLength%tieOffset))  /  curveSOE.pathLength;
+				Vec3f lastPointSOE = curveSOE.getCachedPointAt(lastPointSOECurve);
+				Vec3f firstPoint = curve.getCachedPointAt(0.0F);
 				BlockPos posSOE = connectedStartOtherEnd.getPos();
+
 				currPoint = new Vec3f(
 						lastPointSOE.x + posSOE.getX() - pos.getX(),
 						lastPointSOE.y + posSOE.getY() - pos.getY(),
 						lastPointSOE.z + posSOE.getZ() - pos.getZ()
 						);
 
-				currentAngle = curveSOE.getCachedYawAngleAt(lastPointOnCurve);
-				//FIXME @ZnDevelopment this right here is the source of the textures being wrong on connectors.
-				//I have no clue what all these vectors, pos's, and such are about, but you need to find the distance from the center
-				//of the current start rail to the center of the last point on the rail connected to the start.
-				//Or the first of that point, should the rail starts be butted together.
-				textureOffset = (float) -(
-						Math.hypot(
-								currPoint.x - posSrt.getX(),
-								currPoint.z - posSrt.getZ()
-								) +
-						Math.hypot(
-								posSrt.getX(),
-								posSrt.getZ()
-								)
-						);
+				currentAngle = curveSOE.getCachedYawAngleAt(lastPointSOECurve);
+				textureOffset = (float) Math.hypot(
+						currPoint.x - firstPoint.x,
+						currPoint.z - firstPoint.z);
 
 				texPoints.add(new float[]{
 						currPoint.x,
@@ -460,13 +451,15 @@ public class RenderTrack extends TileEntitySpecialRenderer<TileEntityTrack> {
 			if ( connectedStart.curve != null && (renderStartTie || (renderStartRail && !renderStartRailExtra)) ) {
 
 				currPoint = new Vec3f(
-						posSrt.getX() - pos.getX() + 0.5F,
+						posSrt.getX() - pos.getX(),
 						posSrt.getY() - pos.getY(),
-						posSrt.getZ() - pos.getZ() + 0.5F
+						posSrt.getZ() - pos.getZ()
 						);
 
+				textureOffset = (float) Math.hypot(currPoint.x, currPoint.z);
 				currentAngle = (connectedStart.curve.getCachedYawAngleAt(0) + 180)  %  360;
-				textureOffset = (float) -Math.hypot(currPoint.x, currPoint.z);
+				currPoint.x += 0.5F;
+				currPoint.z += 0.5F;
 
 				texPoints.add(new float[]{
 						currPoint.x,
@@ -493,7 +486,7 @@ public class RenderTrack extends TileEntitySpecialRenderer<TileEntityTrack> {
 			currPoint = curve.getCachedPointAt(f/curve.pathLength);
 			currentAngle = curve.getCachedYawAngleAt(f/curve.pathLength);
 
-			if (f == 0){
+			if (texPoints.isEmpty()){
 				textureOffset = 0;
 			}
 			else {
