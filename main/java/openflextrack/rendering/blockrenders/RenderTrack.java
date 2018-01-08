@@ -425,6 +425,10 @@ public class RenderTrack extends TileEntitySpecialRenderer<TileEntityTrack> {
 						);
 
 				currentAngle = curveSOE.getCachedYawAngleAt(lastPointOnCurve);
+				//FIXME @ZnDevelopment this right here is the source of the textures being wrong on connectors.
+				//I have no clue what all these vectors, pos's, and such are about, but you need to find the distance from the center
+				//of the current start rail to the center of the last point on the rail connected to the start.
+				//Or the first of that point, should the rail starts be butted together.
 				textureOffset = (float) -(
 						Math.hypot(
 								currPoint.x - posSrt.getX(),
