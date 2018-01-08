@@ -3,7 +3,6 @@ package openflextrack;
 import net.minecraftforge.fml.common.Mod;
 import net.minecraftforge.fml.common.Mod.EventHandler;
 import net.minecraftforge.fml.common.Mod.Instance;
-import net.minecraftforge.fml.common.ModMetadata;
 import net.minecraftforge.fml.common.SidedProxy;
 import net.minecraftforge.fml.common.event.FMLInitializationEvent;
 import net.minecraftforge.fml.common.event.FMLPreInitializationEvent;
@@ -38,7 +37,6 @@ public class OFT {
 	@EventHandler
 	public void preInit(FMLPreInitializationEvent event) {
 		proxy.preInit(event);
-		initModMetadata(event.getModMetadata());
 	}
 
 	/**
@@ -49,20 +47,5 @@ public class OFT {
 	@EventHandler
 	public void init(FMLInitializationEvent event) {
 		proxy.init(event);
-	}
-
-	/**
-	 * Called to initialise the given mod metadata container with this mod's data.
-	 * 
-	 * @param meta - The {@link net.minecraftforge.fml.common.ModMetadata mod's metadata} reference to populate.
-	 */
-	private static void initModMetadata(ModMetadata meta) {
-		//TODO @don_bruce MODMETA - I've heard reports of this crashing Linux machines. Should probably put it into a mcmeta file or whatever it's supposed to go into.
-		//TODO @don_bruce MODMETA - Verify whether merely modifying the mod metadata is causing trouble, or whether there is something peculiar that is causing known issue.
-		meta.name = MODNAME;
-		meta.modId = MODID;
-		meta.version = MODVER;
-		meta.description = "An Open-Source Flexible Track System.";
-		meta.authorList.add("don_bruce");
 	}
 }
