@@ -19,6 +19,7 @@ import net.minecraft.util.math.BlockPos;
 import net.minecraft.util.math.RayTraceResult;
 import net.minecraft.world.IBlockAccess;
 import net.minecraft.world.World;
+import openflextrack.ExpireableMap;
 import openflextrack.OFTRegistry;
 
 public class BlockTrackFake extends Block {
@@ -34,6 +35,11 @@ public class BlockTrackFake extends Block {
 
 	/** Reference to the first broken block's {@link net.minecraft.util.math.BlockPos BlockPos}. */
 	private static BlockPos firstBrokenBlockPos;
+	
+	private static ExpireableMap<String, BlockPos> masterPositions = new ExpireableMap<String, BlockPos>();
+	private static String masterPosKey(World world, BlockPos pos) {
+		return world.provider.getDimension()  + ":" + pos;
+	}
 
 
 	public BlockTrackFake(){
@@ -57,7 +63,7 @@ public class BlockTrackFake extends Block {
 				firstBrokenBlockPos = null;
 			}
 		}
-
+		masterPositions.put(masterPosKey(world, pos),  null);
 		super.breakBlock(world, pos, state);
 	}
 
@@ -92,6 +98,11 @@ public class BlockTrackFake extends Block {
 	 * @return The master block's position, or {@code null} if none was found.
 	 */
 	public static BlockPos getMasterPos(World world, final BlockPos thisPos) {
+		String key = masterPosKey(world, thisPos);
+		BlockPos cached = masterPositions.get(key);
+		if (cached != null) {
+			return cached;
+		}
 
 		List<BlockPos> testedBlocks = new ArrayList<BlockPos>();
 		List<BlockPos> blocksToTest = new ArrayList<BlockPos>();
@@ -119,7 +130,7 @@ public class BlockTrackFake extends Block {
 					TileEntity tile = world.getTileEntity(testingPos.offset(searchOffset));
 					if (tile instanceof TileEntityTrack &&
 							((TileEntityTrack) tile).getFakeTracks().contains(thisPos)) {
-
+						masterPositions.put(key, testingPos.offset(searchOffset));
 						return testingPos.offset(searchOffset);
 					}
 				}
