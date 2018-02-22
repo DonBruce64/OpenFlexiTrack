@@ -10,11 +10,16 @@ import net.minecraft.util.math.AxisAlignedBB;
 import net.minecraft.util.math.BlockPos;
 import net.minecraft.util.math.MathHelper;
 import net.minecraft.util.math.RayTraceResult;
+import net.minecraft.util.math.Vec3d;
 import net.minecraft.world.IBlockAccess;
 import net.minecraft.world.World;
+import net.minecraftforge.fml.common.Optional;
 import openflextrack.OFTRegistry;
+import trackapi.lib.Gauges;
+import trackapi.lib.ITrackBlock;
 
-public class BlockTrack extends BlockRotateable {
+@Optional.Interface(iface = "trackapi.lib.ITrackBlock", modid = "trackapi")
+public class BlockTrack extends BlockRotateable implements ITrackBlock {
 
 	/** Default block collision box. */
 	private static final AxisAlignedBB blockBox = new AxisAlignedBB(0.0F, 0.0F, 0.0F, 1.0F, 0.125F, 1.0F);
@@ -97,5 +102,24 @@ public class BlockTrack extends BlockRotateable {
 	public ItemStack getPickBlock(IBlockState state, RayTraceResult target, World world, BlockPos pos, EntityPlayer player){
 		//TODO COMPAT - Add track sub-types here as properties and return meta for item damage.
 		return new ItemStack(OFTRegistry.track);
+	}
+
+
+	@Override
+	public double getTrackGauge(World world, BlockPos pos) {
+		return Gauges.STANDARD;
+	}
+
+
+	@Override
+	public Vec3d getNextPosition(World world, BlockPos pos, Vec3d currentPosition, Vec3d motion) {
+		TileEntity tile = world.getTileEntity(pos);
+		if (tile instanceof TileEntityTrack) {
+			TileEntityTrack track = (TileEntityTrack) tile;
+			if (track.curve != null) {
+				//TODO return next pos given motion and track.curve
+			}
+		}
+		return currentPosition;
 	}
 }

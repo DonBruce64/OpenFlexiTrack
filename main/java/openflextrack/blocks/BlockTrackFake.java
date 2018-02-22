@@ -17,12 +17,17 @@ import net.minecraft.util.EnumFacing;
 import net.minecraft.util.math.AxisAlignedBB;
 import net.minecraft.util.math.BlockPos;
 import net.minecraft.util.math.RayTraceResult;
+import net.minecraft.util.math.Vec3d;
 import net.minecraft.world.IBlockAccess;
 import net.minecraft.world.World;
+import net.minecraftforge.fml.common.Optional;
 import openflextrack.ExpireableMap;
 import openflextrack.OFTRegistry;
+import trackapi.lib.ITrackBlock;
+import trackapi.lib.Gauges;
 
-public class BlockTrackFake extends Block {
+@Optional.Interface(iface = "trackapi.lib.ITrackBlock", modid = "trackapi")
+public class BlockTrackFake extends Block implements ITrackBlock {
 
 	/** Height property of this block, used with {@link net.minecraft.block.state.IBlockState block states}. */
 	public static final PropertyInteger height = PropertyInteger.create("height", 0, 15);
@@ -207,5 +212,25 @@ public class BlockTrackFake extends Block {
 	 */
 	public static void toggleMainTrackBreakage(boolean enable) {
 		tryBreakTrackWhenBroken = enable;
+	}
+
+
+	@Override
+	public Vec3d getNextPosition(World world, BlockPos pos, Vec3d currentPosition, Vec3d motion) {
+		BlockPos master = getMasterPos(world, pos);
+		if (master == null) {
+			return null;
+		}
+		return OFTRegistry.trackStructure.getNextPosition(world, master, currentPosition, motion);
+	}
+
+
+	@Override
+	public double getTrackGauge(World world, BlockPos pos) {
+		BlockPos master = getMasterPos(world, pos);
+		if (master == null) {
+			return Gauges.STANDARD;
+		}
+		return OFTRegistry.trackStructure.getTrackGauge(world, master);
 	}
 }

@@ -41,7 +41,7 @@ public class OFTRegistry {
 	/*
 	 * Block fields.
 	 */
-	public static final Block trackStructure = new BlockTrack();
+	public static final BlockTrack trackStructure = new BlockTrack();
 	public static final Block trackStructureFake = new BlockTrackFake();
 	public static final Block surveyFlag = new BlockSurveyFlag();
 
