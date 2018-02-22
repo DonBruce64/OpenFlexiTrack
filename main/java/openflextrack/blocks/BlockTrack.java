@@ -15,6 +15,7 @@ import net.minecraft.world.IBlockAccess;
 import net.minecraft.world.World;
 import net.minecraftforge.fml.common.Optional;
 import openflextrack.OFTRegistry;
+import openflextrack.api.util.Vec3f;
 import trackapi.lib.Gauges;
 import trackapi.lib.ITrackBlock;
 
@@ -117,7 +118,12 @@ public class BlockTrack extends BlockRotateable implements ITrackBlock {
 		if (tile instanceof TileEntityTrack) {
 			TileEntityTrack track = (TileEntityTrack) tile;
 			if (track.curve != null) {
-				//TODO return next pos given motion and track.curve
+				// Move along motion
+				currentPosition = currentPosition.add(motion);
+				// fit to curve
+				Vec3f posF = new Vec3f(currentPosition.xCoord, currentPosition.yCoord, currentPosition.zCoord);
+				posF = track.curve.getPosAlongCurve(posF);
+				return new Vec3d(posF.x, posF.y, posF.z);
 			}
 		}
 		return currentPosition;
