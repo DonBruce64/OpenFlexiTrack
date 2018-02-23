@@ -166,11 +166,6 @@ public class TileEntitySurveyFlag extends TileEntityRotatable implements ITrackC
 	}
 
 	@Override
-	public BlockPos getBlockPos() {
-		return this.pos;
-	}
-
-	@Override
 	public OFTCurve getCurve() {
 		return this.linkedCurve;
 	}

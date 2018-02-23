@@ -11,12 +11,6 @@ import net.minecraft.world.World;
  * @author Leshuwa Kaiheiwa
  */
 public interface ITrackContainer {
-
-	/**
-	 * Return the {@link net.minecraft.util.math.BlockPos BlockPos} the container is positioned at.
-	 */
-	BlockPos getBlockPos();
-
 	/**
 	 * Return the {@link openflextrack.api.OFTCurve curve} associated with this track, may be {@code null}.
 	 */
@@ -32,11 +26,6 @@ public interface ITrackContainer {
 	 * Return the {@link openflextrack.api.ISleeperType sleeper type} of this track.
 	 */
 	ISleeperType getSleeperType();
-
-	/**
-	 * Return the {@link net.minecraft.world.World World} object this container is in.
-	 */
-	World getWorld();
 
 	/**
 	 * Return {@code true} if this track is a hologram.

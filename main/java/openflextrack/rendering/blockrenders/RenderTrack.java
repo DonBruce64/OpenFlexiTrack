@@ -259,7 +259,7 @@ public class RenderTrack extends TileEntitySpecialRenderer<TileEntityTrack> {
 			/* Render the finished track, including track beds and rails. */
 			GL11.glPushMatrix();
 			{
-				renderTrackFromCurve(tileTrack, tileTrack.connectedTrack, otherEnd.connectedTrack);
+				renderTrackFromCurve(tileTrack.getWorld(), tileTrack, tileTrack.getPos(), tileTrack.connectedTrack, otherEnd.connectedTrack);
 			}
 			GL11.glPopMatrix();
 
@@ -291,7 +291,7 @@ public class RenderTrack extends TileEntitySpecialRenderer<TileEntityTrack> {
 	 * @param connectedStart - The {@link openflextrack.blocks.TileEntityTrack track} connected to the start of the rendered track. May be {@code null}.
 	 * @param connectedEnd - The track connected to the end of the rendered track. May be {@code null}.
 	 */
-	public static void renderTrackFromCurve(ITrackContainer trackContainer, @Nullable TileEntityTrack connectedStart, @Nullable TileEntityTrack connectedEnd) {
+	public static void renderTrackFromCurve(World world, ITrackContainer trackContainer, BlockPos pos, @Nullable TileEntityTrack connectedStart, @Nullable TileEntityTrack connectedEnd) {
 
 		/* Don't render if there's no curve. */
 		OFTCurve curve = trackContainer.getCurve();
@@ -302,8 +302,6 @@ public class RenderTrack extends TileEntitySpecialRenderer<TileEntityTrack> {
 		/*
 		 * Read track container data.
 		 */
-		World world = trackContainer.getWorld();
-		BlockPos pos = trackContainer.getBlockPos();
 		ISleeperType sleeperType = trackContainer.getSleeperType();
 		final float tieOffset = sleeperType.getOffset();
 		final float tieWidth = sleeperType.getDefaultWidth();
