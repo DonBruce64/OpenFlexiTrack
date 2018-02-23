@@ -143,7 +143,7 @@ public class OFTCurve {
 	public Vec3f getPosAlongCurve(Vec3f currentPos) {
 		
 		for (int i = 0; i < cachedPathPoints.length; i ++) {
-			Vec3f pt = this.getCachedPointAt(i);
+			Vec3f pt = cachedPathPoints[i];
 			double dist = pt.distTo(currentPos);
 			if (dist < 1) {
 				// Point is between us and the next point
