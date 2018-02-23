@@ -3,6 +3,7 @@ package openflextrack.blocks;
 import java.util.ArrayList;
 import java.util.List;
 import java.util.Random;
+import java.util.concurrent.TimeUnit;
 
 import net.minecraft.block.Block;
 import net.minecraft.block.material.Material;
@@ -21,10 +22,11 @@ import net.minecraft.util.math.Vec3d;
 import net.minecraft.world.IBlockAccess;
 import net.minecraft.world.World;
 import net.minecraftforge.fml.common.Optional;
-import openflextrack.ExpireableMap;
 import openflextrack.OFTRegistry;
 import trackapi.lib.ITrackBlock;
 import trackapi.lib.Gauges;
+import com.google.common.cache.Cache;
+import com.google.common.cache.CacheBuilder;
 
 @Optional.Interface(iface = "trackapi.lib.ITrackBlock", modid = "trackapi")
 public class BlockTrackFake extends Block implements ITrackBlock {
@@ -41,7 +43,7 @@ public class BlockTrackFake extends Block implements ITrackBlock {
 	/** Reference to the first broken block's {@link net.minecraft.util.math.BlockPos BlockPos}. */
 	private static BlockPos firstBrokenBlockPos;
 	
-	private static ExpireableMap<String, BlockPos> masterPositions = new ExpireableMap<String, BlockPos>();
+	private static Cache<String, BlockPos> masterPositions = CacheBuilder.newBuilder().expireAfterAccess(10, TimeUnit.SECONDS).build();
 	private static String masterPosKey(World world, BlockPos pos) {
 		return world.provider.getDimension()  + ":" + pos;
 	}
@@ -104,7 +106,7 @@ public class BlockTrackFake extends Block implements ITrackBlock {
 	 */
 	public static BlockPos getMasterPos(World world, final BlockPos thisPos) {
 		String key = masterPosKey(world, thisPos);
-		BlockPos cached = masterPositions.get(key);
+		BlockPos cached = masterPositions.getIfPresent(key);
 		if (cached != null) {
 			return cached;
 		}
