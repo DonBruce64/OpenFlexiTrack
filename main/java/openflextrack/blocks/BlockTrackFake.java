@@ -242,7 +242,7 @@ public class BlockTrackFake extends Block implements ITrackBlock {
 	@Override
 	public boolean onBlockActivated(World world, BlockPos pos, IBlockState state, EntityPlayer playerIn, EnumHand hand, @Nullable ItemStack heldItem, EnumFacing side, float hitX, float hitY, float hitZ)
     {
-		//this.getNextPosition(world, pos, new Vec3d(pos.getX() + hitX, pos.getY() + hitY, pos.getZ() + hitZ), new Vec3d(0,0,0));
+		this.getNextPosition(world, pos, new Vec3d(pos.getX() + hitX, pos.getY() + hitY, pos.getZ() + hitZ), new Vec3d(0,0,0));
         return false;
     }
 }

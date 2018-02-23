@@ -141,23 +141,16 @@ public class OFTCurve {
 	}
 	
 	public Vec3f getPosAlongCurve(Vec3f currentPos) {
-        //System.out.println(String.format("AP - %s %s %s", currentPos.x, currentPos.y, currentPos.z));
-        
 		for (int i = 0; i < cachedPathPoints.length; i ++) {
 			Vec3f pt = cachedPathPoints[i];
 			
-			pt.y = currentPos.y;
-			
 			double dist = pt.distTo(currentPos);
-            //System.out.println(String.format("AP - %s %s %s", pt.x, pt.y, pt.z));
-            //System.out.println(dist);
-			if (dist < 1) {
+			if (dist < 1.5) {
 				// Point is between us and the next point
 				// Approximate the new pos based on the linear distance remaining
 				float t = (float)i / cachedPathPoints.length;
-				t += dist;
+				t += dist / this.pathLength;
 				currentPos = getPathPoint(t);
-                //System.out.println(String.format("AP - %s %s %s", currentPos.x, currentPos.y, currentPos.z));
 				
 				return currentPos;
 			}

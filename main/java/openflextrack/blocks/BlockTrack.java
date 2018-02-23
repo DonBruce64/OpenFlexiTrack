@@ -120,11 +120,13 @@ public class BlockTrack extends BlockRotateable implements ITrackBlock {
 			if (track.curve != null) {
 				// Move along motion
 				currentPosition = currentPosition.add(motion);
-				currentPosition = currentPosition.addVector(-pos.getX(), -pos.getY(), -pos.getZ());
+				currentPosition = new Vec3d(currentPosition.xCoord - (pos.getX() + 0.5), currentPosition.yCoord - pos.getY(), currentPosition.zCoord - (pos.getZ() + 0.5));
 				// fit to curve
 				Vec3f posF = new Vec3f(currentPosition.xCoord, currentPosition.yCoord, currentPosition.zCoord);
 				posF = track.curve.getPosAlongCurve(posF);
-				return new Vec3d(posF.x, posF.y, posF.z).addVector(pos.getX(), pos.getY(), pos.getZ());
+				Vec3d nextPosition = new Vec3d(posF.x, posF.y, posF.z);
+				nextPosition = nextPosition.addVector(pos.getX() + 0.5, pos.getY(), pos.getZ() + 0.5);
+				return nextPosition;
 			}
 		}
 		return currentPosition;
