@@ -44,4 +44,12 @@ public class Vec3f {
 		
 		return Math.sqrt( (x*x) + (y*y) + (z*z) );
 	}
+	
+	public Vec3f add(Vec3f vec)  {
+		return new Vec3f(this.x + vec.x, this.y + vec.y, this.z + vec.z);
+	}
+	
+	public Vec3f sub(Vec3f vec)  {
+		return new Vec3f(this.x - vec.x, this.y - vec.y, this.z - vec.z);
+	}
 }
