@@ -70,7 +70,7 @@ public class BlockTrackFake extends Block implements ITrackBlock {
 				firstBrokenBlockPos = null;
 			}
 		}
-		masterPositions.put(masterPosKey(world, pos),  null);
+		masterPositions.invalidate(masterPosKey(world, pos));
 		super.breakBlock(world, pos, state);
 	}
 
