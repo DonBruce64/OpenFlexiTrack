@@ -66,7 +66,7 @@ public class RenderSurveyFlag extends TileEntitySpecialRenderer<TileEntitySurvey
 						return;
 					}
 					
-					RenderTrack.renderTrackFromCurve(tileFlag, null, null);
+					RenderTrack.renderTrackFromCurve(tileFlag.getWorld(), tileFlag, tileFlag.getPos(), null, null);
 				}
 			}
 		}

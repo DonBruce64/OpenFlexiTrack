@@ -3,6 +3,9 @@ package openflextrack.blocks;
 import java.util.ArrayList;
 import java.util.List;
 import java.util.Random;
+import java.util.concurrent.TimeUnit;
+
+import javax.annotation.Nullable;
 
 import net.minecraft.block.Block;
 import net.minecraft.block.material.Material;
@@ -14,14 +17,22 @@ import net.minecraft.item.Item;
 import net.minecraft.item.ItemStack;
 import net.minecraft.tileentity.TileEntity;
 import net.minecraft.util.EnumFacing;
+import net.minecraft.util.EnumHand;
 import net.minecraft.util.math.AxisAlignedBB;
 import net.minecraft.util.math.BlockPos;
 import net.minecraft.util.math.RayTraceResult;
+import net.minecraft.util.math.Vec3d;
 import net.minecraft.world.IBlockAccess;
 import net.minecraft.world.World;
+import net.minecraftforge.fml.common.Optional;
 import openflextrack.OFTRegistry;
+import trackapi.lib.ITrackBlock;
+import trackapi.lib.Gauges;
+import com.google.common.cache.Cache;
+import com.google.common.cache.CacheBuilder;
 
-public class BlockTrackFake extends Block {
+@Optional.Interface(iface = "trackapi.lib.ITrackBlock", modid = "trackapi")
+public class BlockTrackFake extends Block implements ITrackBlock {
 
 	/** Height property of this block, used with {@link net.minecraft.block.state.IBlockState block states}. */
 	public static final PropertyInteger height = PropertyInteger.create("height", 0, 15);
@@ -34,6 +45,11 @@ public class BlockTrackFake extends Block {
 
 	/** Reference to the first broken block's {@link net.minecraft.util.math.BlockPos BlockPos}. */
 	private static BlockPos firstBrokenBlockPos;
+	
+	private static Cache<String, BlockPos> masterPositions = CacheBuilder.newBuilder().expireAfterAccess(10, TimeUnit.SECONDS).build();
+	private static String masterPosKey(World world, BlockPos pos) {
+		return world.provider.getDimension()  + ":" + pos;
+	}
 
 
 	public BlockTrackFake(){
@@ -57,7 +73,7 @@ public class BlockTrackFake extends Block {
 				firstBrokenBlockPos = null;
 			}
 		}
-
+		masterPositions.invalidate(masterPosKey(world, pos));
 		super.breakBlock(world, pos, state);
 	}
 
@@ -92,6 +108,11 @@ public class BlockTrackFake extends Block {
 	 * @return The master block's position, or {@code null} if none was found.
 	 */
 	public static BlockPos getMasterPos(World world, final BlockPos thisPos) {
+		String key = masterPosKey(world, thisPos);
+		BlockPos cached = masterPositions.getIfPresent(key);
+		if (cached != null) {
+			return cached;
+		}
 
 		List<BlockPos> testedBlocks = new ArrayList<BlockPos>();
 		List<BlockPos> blocksToTest = new ArrayList<BlockPos>();
@@ -119,7 +140,7 @@ public class BlockTrackFake extends Block {
 					TileEntity tile = world.getTileEntity(testingPos.offset(searchOffset));
 					if (tile instanceof TileEntityTrack &&
 							((TileEntityTrack) tile).getFakeTracks().contains(thisPos)) {
-
+						masterPositions.put(key, testingPos.offset(searchOffset));
 						return testingPos.offset(searchOffset);
 					}
 				}
@@ -197,4 +218,31 @@ public class BlockTrackFake extends Block {
 	public static void toggleMainTrackBreakage(boolean enable) {
 		tryBreakTrackWhenBroken = enable;
 	}
+
+
+	@Override
+	public Vec3d getNextPosition(World world, BlockPos pos, Vec3d currentPosition, Vec3d motion) {
+		BlockPos master = getMasterPos(world, pos);
+		if (master == null) {
+			return null;
+		}
+		return OFTRegistry.trackStructure.getNextPosition(world, master, currentPosition, motion);
+	}
+
+
+	@Override
+	public double getTrackGauge(World world, BlockPos pos) {
+		BlockPos master = getMasterPos(world, pos);
+		if (master == null) {
+			return Gauges.STANDARD;
+		}
+		return OFTRegistry.trackStructure.getTrackGauge(world, master);
+	}
+	
+	@Override
+	public boolean onBlockActivated(World world, BlockPos pos, IBlockState state, EntityPlayer playerIn, EnumHand hand, @Nullable ItemStack heldItem, EnumFacing side, float hitX, float hitY, float hitZ)
+    {
+		this.getNextPosition(world, pos, new Vec3d(pos.getX() + hitX, pos.getY() + hitY, pos.getZ() + hitZ), new Vec3d(0,0,0));
+        return false;
+    }
 }

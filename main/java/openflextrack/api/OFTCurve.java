@@ -85,6 +85,18 @@ public class OFTCurve {
 		this.pathLength = this.getPathLength();
 		this.cachedPathPoints = this.getCachedPathPoints(new Vec3f[ round(pathLength*CACHED_CURVE_INCREMENTS) + 1 ]);
 	}
+	
+	private Vec3f getPathPoint(float t) {
+
+		boolean skipX = (startPoint.x == endPoint.x),
+				skipY = (startPoint.y == endPoint.y),
+				skipZ = (startPoint.z == endPoint.z);
+		return new Vec3f(
+				getCachedPathPointVal(skipX, startPoint.x, cpStart.x, cpEnd.x, endPoint.x, t),
+				getCachedPathPointVal(skipY, startPoint.y, cpStart.y, cpEnd.y, endPoint.y, t),
+				getCachedPathPointVal(skipZ, startPoint.z, cpStart.z, cpEnd.z, endPoint.z, t)
+				);
+	}
 
 
 	/**
@@ -93,21 +105,10 @@ public class OFTCurve {
 	 * @return The populated array.
 	 */
 	private Vec3f[] getCachedPathPoints(Vec3f[] points) {
-
-		boolean skipX = (startPoint.x == endPoint.x),
-				skipY = (startPoint.y == endPoint.y),
-				skipZ = (startPoint.z == endPoint.z);
-
 		for (int i = 0; i < points.length; ++i) {
-
 			float t = (float)i / points.length;
-			points[i] = new Vec3f(
-					getCachedPathPointVal(skipX, startPoint.x, cpStart.x, cpEnd.x, endPoint.x, t),
-					getCachedPathPointVal(skipY, startPoint.y, cpStart.y, cpEnd.y, endPoint.y, t),
-					getCachedPathPointVal(skipZ, startPoint.z, cpStart.z, cpEnd.z, endPoint.z, t)
-					);
+			points[i] = getPathPoint(t);
 		}
-
 		return points;
 	}
 
@@ -137,6 +138,25 @@ public class OFTCurve {
 				/
 				hypot(cachedPathPoints[point + 1].x - cachedPathPoints[point].x, cachedPathPoints[point + 1].z - cachedPathPoints[point].z)
 				));
+	}
+	
+	public Vec3f getPosAlongCurve(Vec3f currentPos) {
+		for (int i = 0; i < cachedPathPoints.length; i ++) {
+			Vec3f pt = cachedPathPoints[i];
+			
+			double dist = pt.distTo(currentPos);
+			if (dist < 1.5) {
+				// Point is between us and the next point
+				// Approximate the new pos based on the linear distance remaining
+				float t = (float)i / cachedPathPoints.length;
+				t += dist / this.pathLength;
+				currentPos = getPathPoint(t);
+				
+				return currentPos;
+			}
+		}
+		System.out.println("OFF TRACK!");
+		return currentPos;
 	}
 
 	/**

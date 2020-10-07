@@ -44,12 +44,6 @@ public class TileEntityTrack extends TileEntityRotatable implements ITrackContai
 		this.curve = curve;
 	}
 
-
-	@Override
-	public BlockPos getBlockPos() {
-		return this.pos;
-	}
-
 	@Override
 	public OFTCurve getCurve() {
 		return this.curve;
